@@ -9,7 +9,8 @@ export async function gerarPix(
   cpf: string,
   phone: string,
   amountCentavos: number,
-  itemName: string
+  itemName: string,
+  utmQuery?: string
 ): Promise<PixResponse> {
   if (!navigator.onLine) {
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
@@ -23,6 +24,7 @@ export async function gerarPix(
     paymentMethod: 'PIX',
     amount: amountCentavos,
     traceable: true,
+    utmQuery: utmQuery || '',
     items: [
       {
         unitPrice: amountCentavos,

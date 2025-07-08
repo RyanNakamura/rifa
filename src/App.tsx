@@ -363,7 +363,8 @@ function App() {
         cpfLimpo,
         telefoneLimpo,
         amountCentavos,
-        itemName
+        itemName,
+        utmParams
       );
       
       setPixData(pixResponse);
