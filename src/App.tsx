@@ -966,6 +966,7 @@ function App() {
           </div>
         </div>
       )}
+    </>
   );
 
   const renderConsultarContent = () => (
