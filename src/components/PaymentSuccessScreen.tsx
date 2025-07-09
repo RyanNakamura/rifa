@@ -6,7 +6,7 @@ const PaymentSuccessScreen: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-auto shadow-2xl">
         <div className="text-center space-y-4">
           <div className="text-4xl mb-4">🎉</div>
@@ -42,7 +42,7 @@ const PaymentSuccessScreen: React.FC = () => {
           
           <button
             onClick={handleWhatsAppClick}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors duration-200 mt-6"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors duration-200 mt-6 animate-pulse"
           >
             🎁 CLIQUE AQUI para garantir seu prêmio
           </button>

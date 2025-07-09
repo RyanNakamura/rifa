@@ -417,10 +417,6 @@ function App() {
         
         if (status === 'APPROVED') {
           setPaymentStatus('approved');
-        
-        if (status === 'APPROVED') {
-          console.log('🎉 PAGAMENTO APROVADO! Mostrando PaymentSuccessScreen...');
-        }
           clearInterval(interval);
           setStatusCheckInterval(null);
         } else {
