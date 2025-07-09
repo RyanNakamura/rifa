@@ -889,10 +889,34 @@ function App() {
 
             {/* Status */}
             <div className="mt-4 text-center">
-              <div className="flex items-center justify-center gap-2 text-orange-600">
-                <div className="animate-pulse w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-sm font-medium">Aguardando pagamento...</span>
-              </div>
+              {paymentStatus === 'approved' ? (
+                <div className="bg-green-50 border border-green-500 rounded-lg p-4">
+                  <div className="flex items-center justify-center gap-2 text-green-600 mb-3">
+                    <CheckCircle className="w-6 h-6" />
+                    <span className="text-lg font-bold">PAGAMENTO APROVADO!</span>
+                  </div>
+                  <div className="text-center text-green-800">
+                    <p className="font-bold mb-2">🎉 Parabéns! Seu pagamento foi confirmado!</p>
+                    <p className="text-sm mb-2">
+                      ✅ Seus números serão enviados via WhatsApp<br/>
+                      ✅ Você receberá um comprovante por email<br/>
+                      ✅ Acompanhe o sorteio no nosso Instagram
+                    </p>
+                    <div className="bg-green-100 rounded-lg p-2 mt-3">
+                      <p className="text-xs text-green-700">
+                        ID do Pagamento: {pixData.id}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-orange-600">
+                  <div className="animate-pulse w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span className="text-sm font-medium">
+                    {paymentStatus === 'checking' ? 'Verificando pagamento...' : 'Aguardando pagamento...'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
