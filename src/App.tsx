@@ -265,7 +265,12 @@ function App() {
   const selectCustomQuantity = () => {
     const quantity = parseInt(customQuantity);
     if (quantity >= 10) {
-      selectRandomNumbers(quantity);
+      const customPackage = {
+        price: quantity * 0.5, // R$0.50 per number
+        numbers: quantity,
+        popular: false
+      };
+      handlePurchaseClick(customPackage);
       setCustomQuantity('');
     }
   };
