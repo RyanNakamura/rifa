@@ -863,7 +863,6 @@ function App() {
           </div>
         </div>
       )}
-    </>
       
       {/* Modal de Sucesso */}
       {showSuccessModal && (
