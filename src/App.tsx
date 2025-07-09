@@ -796,7 +796,7 @@ function App() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-black text-green-800">
-                💳 PAGAMENTO PIX
+                {paymentStatus === 'approved' ? '✅ PAGAMENTO APROVADO' : '💳 PAGAMENTO PIX'}
               </h2>
               <button 
                 onClick={handleClosePixModal}
@@ -806,118 +806,150 @@ function App() {
               </button>
             </div>
 
-            {/* Informações do Pedido */}
-            <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
+            {paymentStatus === 'approved' ? (
+              /* Payment Approved Content */
               <div className="text-center">
-                <div className="text-lg font-black text-green-900 mb-1">
-                  {selectedPackage?.numbers} números
+                <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle className="w-12 h-12 text-white" />
                 </div>
-                <div className="text-2xl font-black text-green-800">
-                  R${selectedPackage?.price}
-                </div>
-                <div className="text-sm text-green-700">
-                  ID: {pixData.id}
-                </div>
-              </div>
-            </div>
-
-            {/* QR Code */}
-            <div className="text-center mb-6">
-              <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
-                <img 
-                  src={pixData.pixQrCode} 
-                  alt="QR Code PIX" 
-                  className="w-48 h-48 mx-auto"
-                />
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                Escaneie o QR Code com seu app do banco
-              </p>
-            </div>
-
-            {/* Código PIX */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-bold mb-2 text-sm">
-                Ou copie o código PIX:
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={pixData.pixCode}
-                  readOnly
-                  className="flex-1 p-2 border-2 border-gray-300 rounded-lg bg-gray-50 text-xs font-mono"
-                />
-                <button
-                  onClick={copyPixCode}
-                  className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Botões de Ação */}
-            <div className="space-y-3">
-              <button
-                onClick={downloadQRCode}
-                className="w-full bg-blue-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                BAIXAR QR CODE
-              </button>
-              
-              <button
-                onClick={copyPixCode}
-                className="w-full bg-green-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                COPIAR CÓDIGO PIX
-              </button>
-            </div>
-
-            {/* Instruções */}
-            <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="font-bold text-yellow-800 mb-2">📋 Instruções:</h4>
-              <ul className="text-sm text-yellow-700 space-y-1">
-                <li>• Abra o app do seu banco</li>
-                <li>• Escolha a opção PIX</li>
-                <li>• Escaneie o QR Code ou cole o código</li>
-                <li>• Confirme o pagamento</li>
-                <li>• Seus números serão enviados por WhatsApp</li>
-              </ul>
-            </div>
-
-            {/* Status */}
-            <div className="mt-4 text-center">
-              {paymentStatus === 'approved' ? (
-                <div className="bg-green-50 border border-green-500 rounded-lg p-4">
-                  <div className="flex items-center justify-center gap-2 text-green-600 mb-3">
-                    <CheckCircle className="w-6 h-6" />
-                    <span className="text-lg font-bold">PAGAMENTO APROVADO!</span>
-                  </div>
-                  <div className="text-center text-green-800">
-                    <p className="font-bold mb-2">🎉 Parabéns! Seu pagamento foi confirmado!</p>
-                    <p className="text-sm mb-2">
-                      ✅ Seus números serão enviados via WhatsApp<br/>
-                      ✅ Você receberá um comprovante por email<br/>
-                      ✅ Acompanhe o sorteio no nosso Instagram
-                    </p>
-                    <div className="bg-green-100 rounded-lg p-2 mt-3">
-                      <p className="text-xs text-green-700">
-                        ID do Pagamento: {pixData.id}
-                      </p>
+                
+                <h3 className="text-2xl font-black text-green-800 mb-4">
+                  🎉 PAGAMENTO CONFIRMADO! 🎉
+                </h3>
+                
+                <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-lg font-black text-green-900 mb-1">
+                      {selectedPackage?.numbers} números
+                    </div>
+                    <div className="text-2xl font-black text-green-800">
+                      R${selectedPackage?.price}
+                    </div>
+                    <div className="text-sm text-green-700">
+                      ID: {pixData.id}
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2 text-orange-600">
-                  <div className="animate-pulse w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span className="text-sm font-medium">
-                    {paymentStatus === 'checking' ? 'Verificando pagamento...' : 'Aguardando pagamento...'}
-                  </span>
+                
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <h4 className="font-bold text-green-800 mb-2">✅ Próximos passos:</h4>
+                  <ul className="text-sm text-green-700 space-y-1 text-left">
+                    <li>• Seus números serão enviados por WhatsApp</li>
+                    <li>• Você receberá um comprovante por email</li>
+                    <li>• Acompanhe o sorteio no nosso Instagram</li>
+                    <li>• Boa sorte! 🍀</li>
+                  </ul>
                 </div>
-              )}
-            </div>
+                
+                <button
+                  onClick={handleClosePixModal}
+                  className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  FECHAR
+                </button>
+              </div>
+            ) : (
+              /* Payment Pending Content */
+              <>
+                {/* Informações do Pedido */}
+                <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-lg font-black text-green-900 mb-1">
+                      {selectedPackage?.numbers} números
+                    </div>
+                    <div className="text-2xl font-black text-green-800">
+                      R${selectedPackage?.price}
+                    </div>
+                    <div className="text-sm text-green-700">
+                      ID: {pixData.id}
+                    </div>
+                  </div>
+                </div>
+
+                {/* QR Code */}
+                <div className="text-center mb-6">
+                  <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
+                    <img 
+                      src={pixData.pixQrCode} 
+                      alt="QR Code PIX" 
+                      className="w-48 h-48 mx-auto"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Escaneie o QR Code com seu app do banco
+                  </p>
+                </div>
+
+                {/* Código PIX */}
+                <div className="mb-6">
+                  <label className="block text-gray-700 font-bold mb-2 text-sm">
+                    Ou copie o código PIX:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={pixData.pixCode}
+                      readOnly
+                      className="flex-1 p-2 border-2 border-gray-300 rounded-lg bg-gray-50 text-xs font-mono"
+                    />
+                    <button
+                      onClick={copyPixCode}
+                      className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="space-y-3">
+                  <button
+                    onClick={downloadQRCode}
+                    className="w-full bg-blue-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    BAIXAR QR CODE
+                  </button>
+                  
+                  <button
+                    onClick={copyPixCode}
+                    className="w-full bg-green-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    COPIAR CÓDIGO PIX
+                  </button>
+                </div>
+
+                {/* Instruções */}
+                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-bold text-yellow-800 mb-2">📋 Instruções:</h4>
+                  <ul className="text-sm text-yellow-700 space-y-1">
+                    <li>• Abra o app do seu banco</li>
+                    <li>• Escolha a opção PIX</li>
+                    <li>• Escaneie o QR Code ou cole o código</li>
+                    <li>• Confirme o pagamento</li>
+                    <li>• Seus números serão enviados por WhatsApp</li>
+                  </ul>
+                </div>
+
+                {/* Status */}
+                <div className="mt-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    {paymentStatus === 'checking' ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                        <span className="text-sm font-medium text-blue-600">Verificando pagamento...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="animate-pulse w-2 h-2 bg-orange-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-orange-600">Aguardando pagamento...</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
