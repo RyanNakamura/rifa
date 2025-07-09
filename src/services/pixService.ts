@@ -2,7 +2,7 @@ import { PixResponse } from '../types';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
-const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.status.check';
+const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/transaction.getPayment';
 
 export async function gerarPix(
   name: string,
@@ -105,26 +105,69 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    const response = await fetch(STATUS_CHECK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': SECRET_KEY,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        id: paymentId
-      })
+    // Construir URL com query parameter
+    const url = `${STATUS_CHECK_URL}?id=${encodeURIComponent(paymentId)}`;
+    
+    console.log('Verificando status do pagamento:', {
+      url,
+      paymentId
     });
 
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': SECRET_KEY,
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log('Status da resposta de verificação:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Erro ao verificar status: ${response.status}`);
+      if (response.status === 404) {
+        console.log('Pagamento não encontrado, retornando PENDING');
+        return 'PENDING';
+      } else if (response.status === 403) {
+        console.error('Acesso negado ao verificar status');
+        return 'PENDING';
+      } else {
+        console.error(`Erro ao verificar status: ${response.status}`);
+        return 'PENDING';
+      }
     }
 
-    const data = await response.json();
-    return data.status || 'PENDING';
+    const responseText = await response.text();
+    console.log('Resposta da verificação de status:', responseText);
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Erro ao parsear resposta de status:', e);
+      return 'PENDING';
+    }
+
+    // A API retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
+    const status = data.status || 'PENDING';
+    console.log('Status do pagamento:', status);
+    
+    // Mapear possíveis status da API para nossos status internos
+    switch (status.toUpperCase()) {
+      case 'APPROVED':
+        return 'APPROVED';
+      case 'PENDING':
+        return 'PENDING';
+      case 'CANCELLED':
+      case 'CANCELED':
+        return 'CANCELLED';
+      case 'EXPIRED':
+        return 'EXPIRED';
+      default:
+        return 'PENDING';
+    }
   } catch (error) {
     console.error('Erro ao verificar status do pagamento:', error);
-    return 'PENDING'; // Return pending on error to continue polling
+    // Em caso de erro, retornar PENDING para continuar o polling
+    return 'PENDING';
   }
 }
