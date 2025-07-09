@@ -2,7 +2,7 @@ import { PixResponse } from '../types';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
-const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.status';
+const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.status.check';
 
 export async function gerarPix(
   name: string,
@@ -105,12 +105,16 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    const response = await fetch(`${STATUS_CHECK_URL}/${paymentId}`, {
-      method: 'GET',
+    const response = await fetch(STATUS_CHECK_URL, {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': SECRET_KEY,
         'Accept': 'application/json'
-      }
+      },
+      body: JSON.stringify({
+        id: paymentId
+      })
     });
 
     if (!response.ok) {
