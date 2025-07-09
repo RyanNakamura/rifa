@@ -1,5 +1,4 @@
 import { PixResponse } from '../types';
-import { supabase } from '../lib/supabase';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
@@ -100,7 +99,7 @@ export async function gerarPix(
 }
 
 // Função para salvar transação no banco de dados
-export async function saveTransactionToDatabase(
+async function saveTransactionToDatabase(
   paymentId: string,
   userData: any,
   selectedPackage: any,
@@ -108,7 +107,15 @@ export async function saveTransactionToDatabase(
   phone: string
 ) {
   try {
-    // Primeiro, criar ou atualizar o cliente usando Supabase client
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('Configuração do Supabase não encontrada');
+      return;
+    }
+
+    // Primeiro, criar ou atualizar o cliente
     const customerData = {
       name: userData?.nome || 'Cliente',
       email: userData?.email || `${userData?.nome?.toLowerCase().replace(/\s+/g, '')}@email.com` || 'cliente@superrifa.com',
@@ -116,36 +123,41 @@ export async function saveTransactionToDatabase(
       phone: phone
     };
 
-    const { data: customer, error: customerError } = await supabase
-      .from('customers')
-      .upsert(customerData, { 
-        onConflict: 'email',
-        ignoreDuplicates: false 
-      })
-      .select('id')
-      .single();
+    const customerResponse = await fetch(`${supabaseUrl}/rest/v1/customers`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(customerData)
+    });
 
-    if (customerError) {
-      console.error('Erro ao criar/atualizar cliente:', customerError);
-      return;
+    let customerId = null;
+    if (customerResponse.ok) {
+      const customerResult = await customerResponse.json();
+      customerId = customerResult[0]?.id;
     }
 
     // Criar transação
     const transactionData = {
       payment_id: paymentId,
-      customer_id: customer?.id,
+      customer_id: customerId,
       status: 'pending',
       payment_method: 'PIX',
       total_value: selectedPackage.price * 100, // em centavos
     };
 
-    const { error: transactionError } = await supabase
-      .from('transactions')
-      .insert(transactionData);
-
-    if (transactionError) {
-      console.error('Erro ao criar transação:', transactionError);
-    }
+    await fetch(`${supabaseUrl}/rest/v1/transactions`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(transactionData)
+    });
 
   } catch (error) {
     console.error('Erro ao salvar transação:', error);

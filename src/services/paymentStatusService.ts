@@ -1,5 +1,3 @@
-import { supabase } from '../lib/supabase';
-
 export interface PaymentStatus {
   status: 'pending' | 'approved' | 'failed';
   paymentId: string;
@@ -8,21 +6,33 @@ export interface PaymentStatus {
 
 export async function checkPaymentStatus(paymentId: string): Promise<PaymentStatus> {
   try {
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('status')
-      .eq('payment_id', paymentId)
-      .single();
-
-    if (error) {
-      throw new Error(`Erro ao consultar status: ${error.message}`);
-    }
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    if (data) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Configuração do Supabase não encontrada');
+    }
+
+    const response = await fetch(`${supabaseUrl}/rest/v1/transactions?payment_id=eq.${paymentId}&select=status`, {
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao consultar status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      const transaction = data[0];
       return {
-        status: data.status === 'approved' ? 'approved' : 'pending',
+        status: transaction.status === 'approved' ? 'approved' : 'pending',
         paymentId,
-        message: data.status === 'approved' ? 'Pagamento aprovado!' : 'Aguardando pagamento...'
+        message: transaction.status === 'approved' ? 'Pagamento aprovado!' : 'Aguardando pagamento...'
       };
     }
 
