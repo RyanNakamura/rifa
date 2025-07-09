@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { gerarPix } from './services/pixService';
+import { gerarPix, verificarStatusPagamento } from './services/pixService';
 import { PixResponse } from './types';
 import { 
   Gift, 
@@ -42,6 +42,8 @@ function App() {
   const [pixData, setPixData] = useState<PixResponse | null>(null);
   const [isGeneratingPix, setIsGeneratingPix] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'checking'>('pending');
+  const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -251,6 +253,11 @@ function App() {
   const handleClosePixModal = () => {
     setShowPixModal(false);
     setPixData(null);
+    setPaymentStatus('pending');
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval);
+      setStatusCheckInterval(null);
+    }
     handleClosePurchaseModal();
   };
 
@@ -370,6 +377,9 @@ function App() {
       setPixData(pixResponse);
       setShowPixModal(true);
       
+      // Start polling for payment status
+      startPaymentStatusPolling(pixResponse.id);
+      
     } catch (error) {
       console.error('Erro ao gerar PIX:', error);
       alert(`Erro ao gerar PIX: ${error.message}`);
@@ -393,6 +403,42 @@ function App() {
       link.click();
     }
   };
+
+  const startPaymentStatusPolling = (paymentId: string) => {
+    // Clear any existing interval
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval);
+    }
+
+    const interval = setInterval(async () => {
+      try {
+        setPaymentStatus('checking');
+        const status = await verificarStatusPagamento(paymentId);
+        
+        if (status === 'APPROVED') {
+          setPaymentStatus('approved');
+          clearInterval(interval);
+          setStatusCheckInterval(null);
+        } else {
+          setPaymentStatus('pending');
+        }
+      } catch (error) {
+        console.error('Erro ao verificar status:', error);
+        setPaymentStatus('pending');
+      }
+    }, 3000); // Check every 3 seconds
+
+    setStatusCheckInterval(interval);
+  };
+
+  // Cleanup interval on component unmount
+  useEffect(() => {
+    return () => {
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+      }
+    };
+  }, [statusCheckInterval]);
 
     const userData = cpfValidation.userData;
 

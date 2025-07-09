@@ -2,6 +2,7 @@ import { PixResponse } from '../types';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
+const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.status';
 
 export async function gerarPix(
   name: string,
@@ -95,5 +96,31 @@ export async function gerarPix(
       throw new Error('Servidor indisponível. Por favor, tente novamente em alguns minutos.');
     }
     throw error;
+  }
+}
+
+export async function verificarStatusPagamento(paymentId: string): Promise<string> {
+  if (!navigator.onLine) {
+    throw new Error('Sem conexão com a internet.');
+  }
+
+  try {
+    const response = await fetch(`${STATUS_CHECK_URL}/${paymentId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': SECRET_KEY,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao verificar status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.status || 'PENDING';
+  } catch (error) {
+    console.error('Erro ao verificar status do pagamento:', error);
+    return 'PENDING'; // Return pending on error to continue polling
   }
 }
