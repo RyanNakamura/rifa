@@ -2,7 +2,7 @@ import { PixResponse } from '../types';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
-const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/transaction.getPayment';
+const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.getPayment';
 
 export async function gerarPix(
   name: string,
