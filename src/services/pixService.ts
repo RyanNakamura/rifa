@@ -1,6 +1,6 @@
 import { PixResponse } from '../types';
 
-const SECRET_KEY = '224abaee-1a46-4272-9e86-70bf2f342df0';
+const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
 
 export async function gerarPix(
