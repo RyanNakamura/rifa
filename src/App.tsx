@@ -44,6 +44,7 @@ function App() {
   const [showPixModal, setShowPixModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'checking'>('pending');
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
+  const [customQuantity, setCustomQuantity] = useState<string>('');
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -259,6 +260,14 @@ function App() {
       setStatusCheckInterval(null);
     }
     handleClosePurchaseModal();
+  };
+
+  const selectCustomQuantity = () => {
+    const quantity = parseInt(customQuantity);
+    if (quantity >= 10) {
+      selectRandomNumbers(quantity);
+      setCustomQuantity('');
+    }
   };
 
   // Função para validar CPF via API
@@ -546,6 +555,30 @@ function App() {
         <h2 className="text-2xl font-black text-center text-white mb-6">
           🎟️ ESCOLHA SEU PACOTE 🎟️
         </h2>
+
+        {/* Custom Quantity Input */}
+        <div className="mb-4">
+          <label className="block text-white font-semibold mb-2">
+            Quantas rifas você quer? (mínimo 10)
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min="10"
+              value={customQuantity}
+              onChange={(e) => setCustomQuantity(e.target.value)}
+              placeholder="Digite a quantidade"
+              className="flex-1 p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:border-yellow-400 outline-none"
+            />
+            <button
+              onClick={selectCustomQuantity}
+              disabled={!customQuantity || parseInt(customQuantity) < 10}
+              className="bg-yellow-400 text-green-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Selecionar
+            </button>
+          </div>
+        </div>
         
         <div className="grid grid-cols-2 gap-4">
           {packages.map((pkg, index) => (
