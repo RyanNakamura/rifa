@@ -255,6 +255,7 @@ function App() {
   const handleClosePixModal = () => {
     setShowPixModal(false);
     setPixData(null);
+    setPaymentStatus(null);
     handleClosePurchaseModal();
   };
 
@@ -385,38 +386,35 @@ function App() {
     }
   };
 
-  // Função para iniciar verificação de status do pagamento
+  // Função para verificar status do pagamento periodicamente
   const startPaymentStatusCheck = (paymentId: string) => {
-    setIsCheckingPayment(true);
-    setPaymentStatus({ status: 'pending', paymentId, message: 'Aguardando pagamento...' });
-    
-    const checkInterval = setInterval(async () => {
+    const checkStatus = async () => {
       try {
         const status = await checkPaymentStatus(paymentId);
         setPaymentStatus(status);
         
         if (status.status === 'approved') {
-          clearInterval(checkInterval);
-          setIsCheckingPayment(false);
           setShowPixModal(false);
           setShowSuccessModal(true);
-          
-          // Limpar dados após 5 segundos
-          setTimeout(() => {
-            setShowSuccessModal(false);
-            handleClosePurchaseModal();
-          }, 5000);
+          return true; // Para o loop
         }
+        return false; // Continua o loop
       } catch (error) {
         console.error('Erro ao verificar status:', error);
+        return false;
       }
-    }, 3000); // Verificar a cada 3 segundos
-    
-    // Parar verificação após 10 minutos
-    setTimeout(() => {
-      clearInterval(checkInterval);
-      setIsCheckingPayment(false);
-    }, 600000);
+    };
+
+    // Verificar imediatamente
+    checkStatus();
+
+    // Verificar a cada 5 segundos
+    const interval = setInterval(async () => {
+      const shouldStop = await checkStatus();
+      if (shouldStop) {
+        clearInterval(interval);
+      }
+    }, 5000);
   };
 
   const copyPixCode = () => {
@@ -887,10 +885,8 @@ function App() {
               <div className={`flex items-center justify-center gap-2 ${
                 paymentStatus?.status === 'approved' ? 'text-green-600' : 'text-orange-600'
               }`}>
-                <div className={`w-2 h-2 rounded-full ${
-                  paymentStatus?.status === 'approved' 
-                    ? 'bg-green-500' 
-                    : 'bg-orange-500 animate-pulse'
+                <div className={`animate-pulse w-2 h-2 rounded-full ${
+                  paymentStatus?.status === 'approved' ? 'bg-green-500' : 'bg-orange-500'
                 }`}></div>
                 <span className="text-sm font-medium">
                   {paymentStatus?.message || 'Aguardando pagamento...'}
@@ -899,68 +895,40 @@ function App() {
             </div>
           </div>
         </div>
-      
+      )}
+
       {/* Modal de Sucesso */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-auto shadow-2xl text-center">
-            {/* Ícone de Sucesso */}
-            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-12 h-12 text-white" />
-            </div>
-            
-            {/* Título */}
-            <h2 className="text-2xl font-black text-green-800 mb-4">
-              🎉 PAGAMENTO APROVADO! 🎉
-            </h2>
-            
-            {/* Mensagem */}
-            <div className="space-y-3 mb-6">
-              <p className="text-gray-700 font-medium">
-                Seu pagamento foi processado com sucesso!
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-black text-green-800 mb-2">
+                🎉 PAGAMENTO APROVADO! 🎉
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Parabéns! Seu pagamento foi processado com sucesso.
               </p>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-green-800 text-sm font-bold">
-                  ✅ Seus números foram reservados
-                </p>
-                <p className="text-green-700 text-sm">
-                  📱 Você receberá seus números por WhatsApp
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-green-800 text-sm">
+                  ✅ Seus números da rifa foram confirmados<br/>
+                  📱 Em breve você receberá seus números por WhatsApp<br/>
+                  🍀 Boa sorte no sorteio!
                 </p>
               </div>
             </div>
             
-            {/* Informações do Pacote */}
-            {selectedPackage && (
-              <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
-                <div className="text-center">
-                  <div className="text-lg font-black text-green-900 mb-1">
-                    {selectedPackage.numbers} números
-                  </div>
-                  <div className="text-xl font-black text-green-800">
-                    R${selectedPackage.price}
-                  </div>
-                  <div className="text-sm text-green-700">
-                    🍀 Boa sorte no sorteio!
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Botão */}
             <button
               onClick={() => {
                 setShowSuccessModal(false);
                 handleClosePurchaseModal();
               }}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-black py-3 px-6 rounded-lg hover:from-green-400 hover:to-green-500 transition-all duration-200"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:from-green-400 hover:to-green-500 transition-all duration-200"
             >
               CONTINUAR
             </button>
-            
-            {/* Auto-close info */}
-            <p className="text-gray-500 text-xs mt-3">
-              Esta janela fechará automaticamente em alguns segundos
-            </p>
           </div>
         </div>
       )}
