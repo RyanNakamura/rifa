@@ -170,7 +170,7 @@ Deno.serve(async (req: Request) => {
       // Execute liberar_acesso_ao_usuario function
       const { error: accessError } = await supabase.rpc('liberar_acesso_ao_usuario', {
         user_email: webhookData.customer.email,
-        payment_id: webhookData.paymentId
+        p_payment_id: webhookData.paymentId
       });
 
       if (accessError) {
