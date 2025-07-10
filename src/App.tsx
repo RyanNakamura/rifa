@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { gerarPix, verificarStatusPagamento } from './services/pixService';
 import { PixResponse } from './types';
+import { validateCpf, formatCpf, cleanCpf } from './services/cpfValidationService';
 import { 
   Gift, 
   Clock, 
@@ -46,6 +47,8 @@ function App() {
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [customQuantity, setCustomQuantity] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(1);
+  const [cpfValidationStatus, setCpfValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
+  const [cpfValidationMessage, setCpfValidationMessage] = useState('');
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -276,6 +279,38 @@ function App() {
     }
   };
 
+  const handleCpfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const formattedValue = formatCpf(rawValue);
+    const cleanValue = cleanCpf(rawValue);
+    
+    setPurchaseData(prev => ({ ...prev, cpf: formattedValue }));
+    
+    // Reset validation status
+    setCpfValidationStatus('idle');
+    setCpfValidationMessage('');
+    
+    // Only validate if CPF has 11 digits
+    if (cleanValue.length === 11) {
+      setCpfValidationStatus('validating');
+      
+      try {
+        const validation = await validateCpf(cleanValue);
+        
+        if (validation.valid) {
+          setCpfValidationStatus('valid');
+          setCpfValidationMessage('CPF válido');
+        } else {
+          setCpfValidationStatus('invalid');
+          setCpfValidationMessage(validation.message || 'CPF inválido');
+        }
+      } catch (error) {
+        setCpfValidationStatus('invalid');
+        setCpfValidationMessage('Erro ao validar CPF');
+      }
+    }
+  };
+
   // Função para validar CPF via API
   const validateCPF = async (cpf) => {
     const cpfLimpo = cpf.replace(/\D/g, '');
@@ -357,8 +392,8 @@ function App() {
       return;
     }
     
-    if (!cpfValidation.isValid) {
-      alert('CPF inválido! Verifique os dados informados.');
+    if (cpfValidationStatus === 'invalid') {
+      alert('Por favor, insira um CPF válido.');
       return;
     }
     
@@ -379,10 +414,12 @@ function App() {
       // Gerar email baseado no nome se não tiver
       const email = userData?.email || `${userData?.nome?.toLowerCase().replace(/\s+/g, '')}@email.com` || 'cliente@superrifa.com';
       
+      // Use clean CPF (only numbers) for the API
+      const cleanCpfValue = cleanCpf(purchaseData.cpf);
       const pixResponse = await gerarPix(
         userData?.nome || 'Cliente',
         email,
-        cpfLimpo,
+        cleanCpfValue,
         telefoneLimpo,
         amountCentavos,
         itemName,
@@ -766,31 +803,37 @@ function App() {
                   <input
                     type="text"
                     value={purchaseData.cpf}
-                    onChange={(e) => handleInputChange('cpf', e.target.value)}
-                    placeholder="000.000.000-00"
-                    maxLength="14"
+                    onChange={handleCpfChange}
                     className={`w-full p-2.5 border-2 rounded-lg outline-none text-sm transition-colors ${
-                      cpfValidation.isValid === null 
-                        ? 'border-gray-300 focus:border-green-500' 
-                        : cpfValidation.isValid 
-                        ? 'border-green-500 bg-green-50' 
-                        : 'border-red-500 bg-red-50'
+                      cpfValidationStatus === 'valid' ? 'border-green-500' :
+                      cpfValidationStatus === 'invalid' ? 'border-red-500' :
+                      'border-gray-300 focus:border-green-500'
                     }`}
+                    placeholder="000.000.000-00"
+                    required
+                    maxLength={14}
                   />
-                  {cpfValidation.isLoading && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
-                    </div>
-                  )}
-                  {cpfValidation.isValid === true && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    </div>
-                  )}
+                  <div className="absolute -right-2 top-1/2 -translate-y-1/2">
+                    {cpfValidationStatus === 'validating' && (
+                      <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                    {cpfValidationStatus === 'valid' && (
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    {cpfValidationStatus === 'invalid' && (
+                      <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                        <X className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {cpfValidation.error && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">
-                    {cpfValidation.error}
+                {cpfValidationMessage && (
+                  <p className={`text-xs mt-1 ${
+                    cpfValidationStatus === 'valid' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {cpfValidationMessage}
                   </p>
                 )}
               </div>
@@ -813,14 +856,14 @@ function App() {
             {/* Botão de Continuar */}
             <button
               onClick={handlePurchaseSubmit}
-              disabled={!cpfValidation.isValid || cpfValidation.isLoading || isGeneratingPix}
+              disabled={cpfValidationStatus !== 'valid' || cpfValidationStatus === 'validating' || isGeneratingPix}
               className={`w-full mt-4 font-black py-2.5 px-6 rounded-lg transition-all duration-200 ${
-                cpfValidation.isValid && !cpfValidation.isLoading && !isGeneratingPix
+                cpfValidationStatus === 'valid' && !isGeneratingPix
                   ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-400 hover:to-green-500'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {cpfValidation.isLoading ? 'VALIDANDO...' : isGeneratingPix ? 'GERANDO PIX...' : 'CONTINUAR COMPRA'}
+              {cpfValidationStatus === 'validating' ? 'VALIDANDO...' : isGeneratingPix ? 'GERANDO PIX...' : 'CONTINUAR COMPRA'}
             </button>
 
             {/* Informação de Segurança */}
