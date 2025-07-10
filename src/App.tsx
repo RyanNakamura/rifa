@@ -24,6 +24,10 @@ import {
   Download
 } from 'lucide-react';
 
+interface FormData {
+  name: string;
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState('comprar');
   const [utmParams, setUtmParams] = useState('');
@@ -46,6 +50,10 @@ function App() {
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [customQuantity, setCustomQuantity] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<FormData>({
+    name: ''
+  });
+  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -79,6 +87,33 @@ function App() {
       return `${baseUrl}?${utmParams}`;
     }
     return baseUrl;
+  };
+
+  const getUtmQuery = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmParams = [];
+    
+    for (const [key, value] of urlParams.entries()) {
+      if (key.startsWith('utm_') || key === 'click_id') {
+        utmParams.push(`${key}=${encodeURIComponent(value)}`);
+      }
+    }
+    
+    return utmParams.join('&');
+  };
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const validateForm = () => {
+    return (
+      formData.name.trim() !== '' &&
+      selectedNumbers.length > 0
+    );
   };
 
   useEffect(() => {
