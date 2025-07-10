@@ -295,7 +295,7 @@ function App() {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+      const response = await fetch(`https://apela-api.tech?user=c2af4c30-ed08-4672-9b8a-f172ca2880cd&cpf=${cpf}`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -324,7 +324,7 @@ function App() {
       // Formatação do CPF
       value = value.replace(/\D/g, '');
       value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      if (data.status === 200 && data.nome) {
       value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
       
       // Validar CPF quando tiver 11 dígitos
