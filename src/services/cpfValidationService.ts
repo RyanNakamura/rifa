@@ -24,50 +24,60 @@ export async function validateCpf(cpf: string): Promise<CpfValidationResponse> {
     };
   }
 
-  try {
-    const url = `${CPF_VALIDATION_API_URL_BASE}?user=${USER_ID}&cpf=${cpf}`;
-    
-    console.log('Validating CPF with API:', url);
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      }
-    });
-
-    if (!response.ok) {
-      console.error('CPF validation API error:', response.status);
-      return {
-        valid: false,
-        message: 'Erro ao validar CPF. Tente novamente.'
-      };
-    }
-
-    const data = await response.json();
-    console.log('CPF validation response:', data);
-
-    // Verificar se a API retornou dados válidos
-    if (data.status === 200 && data.nome) {
-      return {
-        valid: true,
-        data: data,
-        message: `CPF válido - ${data.nome}`
-      };
-    } else {
-      return {
-        valid: false,
-        message: 'CPF não encontrado ou inválido'
-      };
-    }
-
-  } catch (error) {
-    console.error('Error validating CPF:', error);
+  // Validação básica de CPF (apenas formato)
+  const isValidFormat = /^\d{11}$/.test(cpf);
+  
+  if (!isValidFormat) {
     return {
       valid: false,
-      message: 'Erro de conexão. Verifique sua internet e tente novamente.'
+      message: 'CPF deve conter apenas números'
     };
   }
+
+  // Validação do algoritmo do CPF
+  const isValidCpf = validateCpfAlgorithm(cpf);
+  
+  if (!isValidCpf) {
+    return {
+      valid: false,
+      message: 'CPF inválido'
+    };
+  }
+
+  return {
+    valid: true,
+    message: 'CPF válido'
+  };
+}
+
+// Função para validar o algoritmo do CPF
+function validateCpfAlgorithm(cpf: string): boolean {
+  // CPFs com todos os dígitos iguais são inválidos
+  if (/^(\d)\1{10}$/.test(cpf)) {
+    return false;
+  }
+
+  // Validação do primeiro dígito verificador
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cpf.charAt(i)) * (10 - i);
+  }
+  let remainder = sum % 11;
+  let digit1 = remainder < 2 ? 0 : 11 - remainder;
+
+  if (digit1 !== parseInt(cpf.charAt(9))) {
+    return false;
+  }
+
+  // Validação do segundo dígito verificador
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cpf.charAt(i)) * (11 - i);
+  }
+  remainder = sum % 11;
+  let digit2 = remainder < 2 ? 0 : 11 - remainder;
+
+  return digit2 === parseInt(cpf.charAt(10));
 }
 
 // Função para formatar CPF (xxx.xxx.xxx-xx)
