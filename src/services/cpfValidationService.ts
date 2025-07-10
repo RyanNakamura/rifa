@@ -62,8 +62,9 @@ function validateCpfAlgorithm(cpf: string): boolean {
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cpf.charAt(i)) * (10 - i);
   }
-  let remainder = sum % 11;
-  let digit1 = remainder < 2 ? 0 : 11 - remainder;
+  
+  let remainder = (sum * 10) % 11;
+  let digit1 = remainder === 10 ? 0 : remainder;
 
   if (digit1 !== parseInt(cpf.charAt(9))) {
     return false;
@@ -74,8 +75,9 @@ function validateCpfAlgorithm(cpf: string): boolean {
   for (let i = 0; i < 10; i++) {
     sum += parseInt(cpf.charAt(i)) * (11 - i);
   }
-  remainder = sum % 11;
-  let digit2 = remainder < 2 ? 0 : 11 - remainder;
+  
+  remainder = (sum * 10) % 11;
+  let digit2 = remainder === 10 ? 0 : remainder;
 
   return digit2 === parseInt(cpf.charAt(10));
 }
