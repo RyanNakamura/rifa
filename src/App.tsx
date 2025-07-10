@@ -547,7 +547,7 @@ function App() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="relative overflow-hidden rounded-lg">
               <img 
-                src="/sw4-car.jpg"
+                src="https://duramaxbrasil.site/sw4.jpg"
                 alt="SW4 0KM"
                 className="w-full h-32 object-cover"
               />
