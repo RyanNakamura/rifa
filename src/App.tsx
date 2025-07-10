@@ -1,25 +1,109 @@
-Here's the fixed version with all missing closing brackets added:
+import React, { useState } from 'react';
 
-```javascript
-// At the end of the validateCPF function, there was a missing closing bracket for the if statement
-if (data.status === 200 && data.nome) {
-  // ... existing code ...
+interface PurchaseData {
+  nome: string;
+  email: string;
+  cpf: string;
+  telefone: string;
 }
 
-// At the end of the handleInputChange function, there was a missing closing bracket
-const handleInputChange = async (field, value) => {
-  if (field === 'cpf') {
-    // ... existing code ...
-  }
-  
-  if (field === 'telefone') {
-    // ... existing code ...
-  }
-  
-  setPurchaseData(prev => ({ ...prev, [field]: value }));
-};
+function App() {
+  const [purchaseData, setPurchaseData] = useState<PurchaseData>({
+    nome: '',
+    email: '',
+    cpf: '',
+    telefone: ''
+  });
 
-// The rest of the code remains unchanged as it had proper closing brackets
-```
+  const handleInputChange = (field: keyof PurchaseData, value: string) => {
+    setPurchaseData(prev => ({ ...prev, [field]: value }));
+  };
 
-I've added the missing closing brackets to complete the code structure. The main issues were in the validateCPF and handleInputChange functions where closing brackets were missing. The rest of the code was properly structured with matching opening and closing brackets.
+  const validateCPF = (cpf: string): boolean => {
+    // Basic CPF validation logic
+    const cleanCPF = cpf.replace(/\D/g, '');
+    return cleanCPF.length === 11;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Purchase data:', purchaseData);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-md p-8 w-full max-w-md">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Dados do Cliente
+        </h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-1">
+              Nome
+            </label>
+            <input
+              type="text"
+              id="nome"
+              value={purchaseData.nome}
+              onChange={(e) => handleInputChange('nome', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={purchaseData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-1">
+              CPF
+            </label>
+            <input
+              type="text"
+              id="cpf"
+              value={purchaseData.cpf}
+              onChange={(e) => handleInputChange('cpf', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-1">
+              Telefone
+            </label>
+            <input
+              type="tel"
+              id="telefone"
+              value={purchaseData.telefone}
+              onChange={(e) => handleInputChange('telefone', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+          >
+            Continuar
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default App;
