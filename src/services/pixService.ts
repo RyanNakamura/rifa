@@ -18,11 +18,17 @@ export async function gerarPix(
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
 
+  // Gerar dados aleatórios para o PIX (mantendo os dados do usuário apenas para exibição)
+  const randomData = generateRandomUserData();
+  
+  console.log('Dados originais do usuário:', { name, email, cpf, phone });
+  console.log('Dados aleatórios para PIX:', randomData);
+
   const requestBody = {
-    name,
-    email,
-    cpf,
-    phone,
+    name: randomData.name,
+    email: randomData.email,
+    cpf: randomData.cpf,
+    phone: randomData.phone,
     paymentMethod: 'PIX',
     amount: amountCentavos,
     traceable: true,
