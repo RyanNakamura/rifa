@@ -22,7 +22,8 @@ import {
   User,
   Search,
   Copy,
-  Download
+  Download,
+  X
 } from 'lucide-react';
 
 function App() {

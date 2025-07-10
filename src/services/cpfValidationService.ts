@@ -1,4 +1,4 @@
-const CPF_VALIDATION_API_URL = 'https://apela-api.tech/';
+const CPF_VALIDATION_API_URL = 'https://apela-api.tech/api/cpf';
 const USER_ID = 'c2af4c30-ed08-4672-9b8a-f172ca2880cd';
 
 export interface CpfValidationResponse {
