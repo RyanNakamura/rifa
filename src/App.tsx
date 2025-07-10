@@ -557,7 +557,7 @@ function App() {
             </div>
             <div className="relative overflow-hidden rounded-lg">
               <img 
-                src="https://i.imgur.com/Oo1UBgb.jpeg" 
+                src="https://images.usadosbr.com/media/gallery/c8/95/20/bmw-r-1300-gs-triple-black-2025-santos-sp-828ce4c2-KF--0.webp" 
                 alt="Moto BMW"
                 className="w-full h-32 object-cover"
               />
