@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { gerarPix, verificarStatusPagamento } from './services/pixService';
 import { PixResponse } from './types';
 import { validateCpf, formatCpf, cleanCpf } from './services/cpfValidationService';
+import PaymentSuccessScreen from './components/PaymentSuccessScreen';
 import { 
   Gift, 
   Clock, 
@@ -50,6 +51,7 @@ function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [cpfValidationStatus, setCpfValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
   const [cpfValidationMessage, setCpfValidationMessage] = useState('');
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -258,6 +260,7 @@ function App() {
 
   const handleClosePixModal = () => {
     setShowPixModal(false);
+    setShowSuccessScreen(false);
     setPixData(null);
     setPaymentStatus('pending');
     if (statusCheckInterval) {
@@ -470,7 +473,7 @@ function App() {
         
         if (status === 'APPROVED') {
           setPaymentStatus('approved');
-          setCurrentStep(4); // Set to step 4 to show success screen
+          setShowSuccessScreen(true);
           clearInterval(interval);
           setStatusCheckInterval(null);
         } else {
@@ -879,7 +882,7 @@ function App() {
       )}
 
       {/* Modal do PIX */}
-      {showPixModal && pixData && paymentStatus !== 'APPROVED' && (
+      {showPixModal && pixData && !showSuccessScreen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 pb-24">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-auto shadow-2xl max-h-full overflow-y-auto">
             {/* Header */}
@@ -1284,6 +1287,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900 relative overflow-hidden">
+      {/* Payment Success Screen */}
+      {showSuccessScreen && <PaymentSuccessScreen />}
+      
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-4 animate-bounce">
