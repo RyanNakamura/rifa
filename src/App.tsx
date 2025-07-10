@@ -48,6 +48,8 @@ function App() {
   const [customQuantity, setCustomQuantity] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(1);
   const [cpfError, setCpfError] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [phone, setPhone] = useState('');
   
   // Form states
   const [formData, setFormData] = useState({
