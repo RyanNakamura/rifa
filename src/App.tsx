@@ -844,51 +844,7 @@ function App() {
               </button>
             </div>
 
-            {paymentStatus === 'approved' ? (
-              /* Payment Approved Content */
-              <div className="text-center">
-                <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-12 h-12 text-white" />
-                </div>
-                
-                <h3 className="text-2xl font-black text-green-800 mb-4">
-                  🎉 PAGAMENTO CONFIRMADO! 🎉
-                </h3>
-                
-                <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-lg font-black text-green-900 mb-1">
-                      {selectedPackage?.numbers} números
-                    </div>
-                    <div className="text-2xl font-black text-green-800">
-                      R${selectedPackage?.price}
-                    </div>
-                    <div className="text-sm text-green-700">
-                      ID: {pixData.id}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                  <h4 className="font-bold text-green-800 mb-2">✅ Próximos passos:</h4>
-                  <ul className="text-sm text-green-700 space-y-1 text-left">
-                    <li>• Seus números serão enviados por WhatsApp</li>
-                    <li>• Você receberá um comprovante por email</li>
-                    <li>• Acompanhe o sorteio no nosso Instagram</li>
-                    <li>• Boa sorte! 🍀</li>
-                  </ul>
-                </div>
-                
-                <button
-                  onClick={handleClosePixModal}
-                  className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  FECHAR
-                </button>
-              </div>
-            ) : (
-              /* Payment Pending Content */
-              <>
+            {/* Payment Pending Content */}
                 {/* Informações do Pedido */}
                 <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
                   <div className="text-center">
@@ -986,8 +942,6 @@ function App() {
                     )}
                   </div>
                 </div>
-              </>
-            )}
           </div>
         </div>
       )}
