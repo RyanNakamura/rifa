@@ -47,6 +47,7 @@ function App() {
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [customQuantity, setCustomQuantity] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(1);
+  const [cpfError, setCpfError] = useState('');
   
   // Form states
   const [formData, setFormData] = useState({
@@ -106,6 +107,53 @@ function App() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Função para formatar CPF
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    let formatted = numbers;
+    
+    if (numbers.length >= 4) {
+      formatted = numbers.slice(0, 3) + '.' + numbers.slice(3);
+    }
+    if (numbers.length >= 7) {
+      formatted = formatted.slice(0, 7) + '.' + formatted.slice(7);
+    }
+    if (numbers.length >= 10) {
+      formatted = formatted.slice(0, 11) + '-' + formatted.slice(11, 13);
+    }
+    
+    return formatted;
+  };
+
+  // Função para validar formato do CPF
+  const validateCPFFormat = (cpf: string) => {
+    // Remove formatação
+    const cleanCpf = cpf.replace(/\D/g, '');
+    
+    // Verifica se tem 11 dígitos
+    if (cleanCpf.length !== 11) {
+      return false;
+    }
+    
+    // Verifica se não são todos números iguais
+    return !/^(\d)\1{10}$/.test(cleanCpf);
+  };
+
+  // Função para formatar telefone
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    let formatted = numbers;
+    
+    if (numbers.length >= 3) {
+      formatted = '(' + numbers.slice(0, 2) + ') ' + numbers.slice(2);
+    }
+    if (numbers.length >= 8) {
+      formatted = formatted.slice(0, 10) + '-' + formatted.slice(10, 14);
+    }
+    
+    return formatted;
+  };
 
   const packages = [
     { price: 20, numbers: 40, popular: false },
@@ -283,6 +331,29 @@ function App() {
     }
   };
 
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCPF(e.target.value);
+    setCpf(formatted);
+    
+    // Validar formato apenas se o campo não estiver vazio
+    if (formatted.length > 0) {
+      if (validateCPFFormat(formatted)) {
+        setCpfError('');
+      } else if (formatted.replace(/\D/g, '').length === 11) {
+        setCpfError('CPF inválido');
+      } else {
+        setCpfError('');
+      }
+    } else {
+      setCpfError('');
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value);
+    setPhone(formatted);
+  };
+
   // Função para validar CPF via API
   const validateCPF = async (cpf) => {
     const cpfLimpo = cpf.replace(/\D/g, '');
@@ -347,6 +418,58 @@ function App() {
     }
     
     return true;
+  };
+
+  const handleGeneratePix = async () => {
+    if (!selectedPackage) return;
+
+    // Validar se todos os campos estão preenchidos
+    if (!name.trim() || !email.trim() || !cpf.trim() || !phone.trim()) {
+      alert('Por favor, preencha todos os campos');
+      return;
+    }
+
+    // Validar formato do CPF
+    if (!validateCPFFormat(cpf)) {
+      setCpfError('CPF inválido');
+      return;
+    }
+
+    setIsGeneratingPix(true);
+    setPixError('');
+
+    try {
+      const userData = cpfValidation.userData;
+      const cpfLimpo = purchaseData.cpf.replace(/\D/g, '');
+      const telefoneLimpo = purchaseData.telefone.replace(/\D/g, '');
+      const amountCentavos = selectedPackage.price * 100; // Converter para centavos
+      const itemName = `${selectedPackage.numbers} números da Super Rifa`;
+      
+      // Gerar email baseado no nome se não tiver
+      const email = userData?.email || `${userData?.nome?.toLowerCase().replace(/\s+/g, '')}@email.com` || 'cliente@superrifa.com';
+      
+      const pixResponse = await gerarPix(
+        userData?.nome || 'Cliente',
+        email,
+        cpfLimpo,
+        telefoneLimpo,
+        amountCentavos,
+        itemName,
+        utmParams
+      );
+      
+      setPixData(pixResponse);
+      setShowPixModal(true);
+      
+      // Start polling for payment status
+      startPaymentStatusPolling(pixResponse.id);
+      
+    } catch (error) {
+      console.error('Erro ao gerar PIX:', error);
+      alert(`Erro ao gerar PIX: ${error.message}`);
+    } finally {
+      setIsGeneratingPix(false);
+    }
   };
 
   const handlePurchaseSubmit = async () => {
@@ -769,9 +892,17 @@ function App() {
                   <input
                     type="text"
                     value={formData.cpf}
-                    onChange={(e) => handleInputChange('cpf', e.target.value)}
-                    className="w-full p-2.5 border-2 rounded-lg outline-none text-sm transition-colors border-gray-300 focus:border-green-500"
+                    onChange={handleCpfChange}
+                    placeholder="000.000.000-00"
+                    className={`w-full p-2.5 border-2 rounded-lg outline-none text-sm transition-colors ${
+                      cpfError ? 'border-red-500' : 'border-gray-300 focus:border-green-500'
+                    }`}
+                    maxLength={14}
+                    required
                   />
+                  {cpfError && (
+                    <p className="text-red-500 text-sm mt-1">{cpfError}</p>
+                  )}
                 </div>
               </div>
 
