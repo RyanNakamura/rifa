@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { gerarPix, verificarStatusPagamento } from './services/pixService';
+import { consultarCPF, formatCPF, isValidCPF } from './services/cpfService';
 import { PixResponse } from './types';
 import { 
   Gift, 
@@ -45,6 +46,33 @@ function App() {
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'checking'>('pending');
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [customQuantity, setCustomQuantity] = useState<string>('');
+  // Função para consultar CPF automaticamente
+  const handleCPFChange = async (cpf: string) => {
+    const formattedCPF = formatCPF(cpf);
+    setFormData(prev => ({ ...prev, cpf: formattedCPF }));
+    
+    // Se o CPF estiver completo e válido, consultar a API
+    if (isValidCPF(formattedCPF)) {
+      setCpfLoading(true);
+      try {
+        const cpfData = await consultarCPF(formattedCPF);
+        if (cpfData && cpfData.nome) {
+          // Preencher automaticamente o nome
+          setFormData(prev => ({
+            ...prev,
+            name: cpfData.nome,
+            cpf: formattedCPF
+          }));
+        }
+      } catch (error) {
+        console.error('Erro ao consultar CPF:', error);
+      } finally {
+        setCpfLoading(false);
+      }
+    }
+  };
+
+  const [cpfLoading, setCpfLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   
   const [timeLeft, setTimeLeft] = useState({
@@ -891,7 +919,7 @@ function App() {
                       type="text"
                       value={pixData.pixCode}
                       readOnly
-                      className="flex-1 p-2 border-2 border-gray-300 rounded-lg bg-gray-50 text-xs font-mono"
+                      onChange={(e) => handleCPFChange(e.target.value)}
                     />
                     <button
                       onClick={copyPixCode}
@@ -899,6 +927,11 @@ function App() {
                     >
                       <Copy className="w-4 h-4" />
                     </button>
+                    {cpfLoading && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1045,14 +1078,21 @@ function App() {
                     <span className="text-sm font-bold text-white">{position}º</span>
                   )}
                 </div>
-                
+                  <div className="relative">
+                    <input
                 {/* Avatar */}
                 <div className="flex-shrink-0">
                   <img 
                     src={participant.avatar} 
                     alt={participant.name}
                     className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
-                  />
+                    />
+                    {cpfLoading && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                        Consultando...
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 {/* Info */}
