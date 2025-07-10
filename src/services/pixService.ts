@@ -1,5 +1,4 @@
 import { PixResponse } from '../types';
-import { generateRandomUserData } from '../utils/randomData';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
@@ -18,17 +17,11 @@ export async function gerarPix(
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
 
-  // Gerar dados aleatórios para o PIX (mantendo os dados do usuário apenas para exibição)
-  const randomData = generateRandomUserData();
-  
-  console.log('Dados originais do usuário:', { name, email, cpf, phone });
-  console.log('Dados aleatórios para PIX:', randomData);
-
   const requestBody = {
-    name: randomData.name,
-    email: randomData.email,
-    cpf: randomData.cpf,
-    phone: randomData.phone,
+    name,
+    email,
+    cpf,
+    phone,
     paymentMethod: 'PIX',
     amount: amountCentavos,
     traceable: true,
