@@ -7,34 +7,34 @@ const PaymentSuccessScreen: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-auto shadow-2xl">
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-auto shadow-2xl max-h-full overflow-y-auto">
         <div className="text-center space-y-4">
           <div className="text-4xl mb-4">🎉</div>
           
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+          <h1 className="text-xl font-bold text-gray-800 mb-3">
             Parabéns! Você é o milésimo comprador da Super Rifa!
           </h1>
           
-          <div className="text-4xl mb-4">🎉</div>
+          <div className="text-3xl mb-3">🎉</div>
           
-          <div className="space-y-3 text-gray-700">
+          <div className="space-y-2 text-gray-700">
             <p className="font-medium">
               E como forma de agradecimento, você acabou de desbloquear um prêmio exclusivo.
             </p>
             
-            <p className="font-semibold">
+            <p className="font-semibold text-sm">
               Sim, é isso mesmo…
             </p>
             
-            <p className="text-red-600 font-bold">
+            <p className="text-red-600 font-bold text-sm">
               👉 Mas atenção: para receber, você precisa chamar AGORA no WhatsApp.
             </p>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-yellow-800 font-semibold">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+              <p className="text-yellow-800 font-semibold text-sm">
                 ⏳ O prêmio só será liberado nas próximas 2 horas.
               </p>
-              <p className="text-red-600 font-bold">
+              <p className="text-red-600 font-bold text-sm">
                 Se passar do tempo… perde!
               </p>
             </div>
@@ -42,7 +42,7 @@ const PaymentSuccessScreen: React.FC = () => {
           
           <button
             onClick={handleWhatsAppClick}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors duration-200 mt-6 animate-pulse"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl text-base transition-colors duration-200 mt-4 animate-pulse"
           >
             🎁 CLIQUE AQUI para garantir seu prêmio
           </button>
