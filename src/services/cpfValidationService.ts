@@ -1,10 +1,19 @@
 const CPF_VALIDATION_API_URL = 'https://apela-api.tech/api/cpf';
+const CPF_VALIDATION_API_URL_BASE = 'https://apela-api.tech/';
 const USER_ID = 'c2af4c30-ed08-4672-9b8a-f172ca2880cd';
 
 export interface CpfValidationResponse {
   valid: boolean;
   message?: string;
-  data?: any;
+  data?: {
+    status: number;
+    nome: string;
+    mae: string;
+    nascimento: string;
+    sexo: string;
+    cpf: string;
+    requisicoes_restantes: number;
+  };
 }
 
 export async function validateCpf(cpf: string): Promise<CpfValidationResponse> {
@@ -16,7 +25,7 @@ export async function validateCpf(cpf: string): Promise<CpfValidationResponse> {
   }
 
   try {
-    const url = `${CPF_VALIDATION_API_URL}?user=${USER_ID}&cpf=${cpf}`;
+    const url = `${CPF_VALIDATION_API_URL_BASE}?user=${USER_ID}&cpf=${cpf}`;
     
     console.log('Validating CPF with API:', url);
 
@@ -38,12 +47,19 @@ export async function validateCpf(cpf: string): Promise<CpfValidationResponse> {
     const data = await response.json();
     console.log('CPF validation response:', data);
 
-    // Assumindo que a API retorna um objeto com informações sobre a validade
-    // Ajuste conforme a estrutura real da resposta da API
-    return {
-      valid: true,
-      data: data
-    };
+    // Verificar se a API retornou dados válidos
+    if (data.status === 200 && data.nome) {
+      return {
+        valid: true,
+        data: data,
+        message: `CPF válido - ${data.nome}`
+      };
+    } else {
+      return {
+        valid: false,
+        message: 'CPF não encontrado ou inválido'
+      };
+    }
 
   } catch (error) {
     console.error('Error validating CPF:', error);
