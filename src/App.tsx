@@ -45,6 +45,7 @@ function App() {
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'checking'>('pending');
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [customQuantity, setCustomQuantity] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState(1);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -431,6 +432,7 @@ function App() {
         
         if (status === 'APPROVED') {
           setPaymentStatus('approved');
+          setCurrentStep(4); // Set to step 4 to show success screen
           clearInterval(interval);
           setStatusCheckInterval(null);
         } else {
@@ -455,6 +457,11 @@ function App() {
   }, [statusCheckInterval]);
 
     const userData = cpfValidation.userData;
+
+  // Show PaymentSuccessScreen when payment is approved
+  if (paymentStatus === 'APPROVED' && currentStep === 4) {
+    return <PaymentSuccessScreen />;
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -828,7 +835,7 @@ function App() {
       )}
 
       {/* Modal do PIX */}
-      {showPixModal && pixData && (
+      {showPixModal && pixData && paymentStatus !== 'APPROVED' && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 pb-24">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-auto shadow-2xl max-h-full overflow-y-auto">
             {/* Header */}
