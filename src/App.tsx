@@ -42,10 +42,17 @@ function App() {
   const [pixData, setPixData] = useState<PixResponse | null>(null);
   const [isGeneratingPix, setIsGeneratingPix] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'checking'>('pending');
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'cancelled' | 'expired'>('pending');
+  const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [customQuantity, setCustomQuantity] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // Form states
+  const [formData, setFormData] = useState({
+    cpf: '',
+    telefone: ''
+  });
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -319,31 +326,27 @@ function App() {
     }
   };
 
-  const handleInputChange = async (field, value) => {
-    if (field === 'cpf') {
-      // Formatação do CPF
-      value = value.replace(/\D/g, '');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-      
-      // Validar CPF quando tiver 11 dígitos
-      const cpfLimpo = value.replace(/\D/g, '');
-      if (cpfLimpo.length === 11) {
-        await validateCPF(value);
-      } else {
-        setCpfValidation({ isValid: null, isLoading: false, userData: null, error: '' });
-      }
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.cpf || !formData.telefone) {
+      alert('Por favor, preencha todos os campos!');
+      return false;
     }
     
-    if (field === 'telefone') {
-      // Formatação do telefone
-      value = value.replace(/\D/g, '');
-      value = value.replace(/(\d{2})(\d)/, '($1) $2');
-      value = value.replace(/(\d{4,5})(\d{4})$/, '$1-$2');
+    if (formData.cpf.replace(/\D/g, '').length !== 11) {
+      alert('CPF deve ter 11 dígitos!');
+      return false;
     }
     
-    setPurchaseData(prev => ({ ...prev, [field]: value }));
+    if (formData.telefone.replace(/\D/g, '').length < 10) {
+      alert('Telefone inválido!');
+      return false;
+    }
+    
+    return true;
   };
 
   const handlePurchaseSubmit = async () => {
@@ -765,34 +768,11 @@ function App() {
                 <div className="relative">
                   <input
                     type="text"
-                    value={purchaseData.cpf}
+                    value={formData.cpf}
                     onChange={(e) => handleInputChange('cpf', e.target.value)}
-                    placeholder="000.000.000-00"
-                    maxLength="14"
-                    className={`w-full p-2.5 border-2 rounded-lg outline-none text-sm transition-colors ${
-                      cpfValidation.isValid === null 
-                        ? 'border-gray-300 focus:border-green-500' 
-                        : cpfValidation.isValid 
-                        ? 'border-green-500 bg-green-50' 
-                        : 'border-red-500 bg-red-50'
-                    }`}
+                    className="w-full p-2.5 border-2 rounded-lg outline-none text-sm transition-colors border-gray-300 focus:border-green-500"
                   />
-                  {cpfValidation.isLoading && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
-                    </div>
-                  )}
-                  {cpfValidation.isValid === true && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    </div>
-                  )}
                 </div>
-                {cpfValidation.error && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">
-                    {cpfValidation.error}
-                  </p>
-                )}
               </div>
 
               <div>
