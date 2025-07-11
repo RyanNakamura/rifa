@@ -17,6 +17,9 @@ export async function gerarPix(
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
 
+  // Log para verificar se utmQuery está chegando corretamente
+  console.log('gerarPix recebendo utmQuery:', utmQuery);
+
   const requestBody = {
     name,
     email,
@@ -39,7 +42,8 @@ export async function gerarPix(
   try {
     console.log('Enviando requisição PIX:', {
       url: API_URL,
-      body: requestBody
+      body: requestBody,
+      utmQueryEnviado: utmQuery || 'vazio'
     });
 
     const response = await fetch(API_URL, {
