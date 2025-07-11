@@ -65,14 +65,15 @@ export async function notifyXTrackyConversion(
   orderId: string
 ): Promise<boolean> {
   try {
-    // URL da API do xTracky para notificar conversões
-    const conversionUrl = `https://cdn.xtracky.com/api/conversion`;
+    // URL correta da API do xTracky para notificar conversões
+    const conversionUrl = `https://apela-api.tech/api/conversion`;
     
     const conversionData = {
       click_id: clickId,
       conversion_value: conversionValue,
       order_id: orderId,
-      currency: 'BRL'
+      currency: 'BRL',
+      token: '07c0b4b9-312a-4bbd-bd76-b227ffdc6f1d' // Seu token xTracky
     };
     
     console.log('Notificando conversão ao xTracky:', conversionData);
@@ -81,6 +82,7 @@ export async function notifyXTrackyConversion(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer 07c0b4b9-312a-4bbd-bd76-b227ffdc6f1d`
       },
       body: JSON.stringify(conversionData)
     });
@@ -89,7 +91,8 @@ export async function notifyXTrackyConversion(
       console.log('Conversão notificada com sucesso ao xTracky');
       return true;
     } else {
-      console.error('Erro ao notificar conversão ao xTracky:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Erro ao notificar conversão ao xTracky:', response.status, response.statusText, errorText);
       return false;
     }
   } catch (error) {
