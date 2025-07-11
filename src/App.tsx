@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { gerarPix, verificarStatusPagamento } from './services/pixService';
 import { PixResponse } from './types';
 import { validateCpf, formatCpf, cleanCpf } from './services/cpfValidationService';
-import { getUtmQuery } from './utils/utmTracker';
 import PaymentSuccessScreen from './components/PaymentSuccessScreen';
 import { 
   Gift, 
@@ -410,10 +409,6 @@ function App() {
     setIsGeneratingPix(true);
     
     try {
-      // Capturar dados UTM do sessionStorage
-      const utmQuery = getUtmQuery();
-      console.log('UTM Query capturada antes de gerar PIX:', utmQuery);
-      
       const userData = cpfValidation.userData;
       const cpfLimpo = purchaseData.cpf.replace(/\D/g, '');
       const telefoneLimpo = purchaseData.telefone.replace(/\D/g, '');
@@ -434,7 +429,7 @@ function App() {
         itemName,
         utmParams
       );
-      const pixData = await gerarPix(name, email, cleanedCpf, phone, totalAmount, itemName, utmQuery);
+      
       setPixData(pixResponse);
       setShowPixModal(true);
       
