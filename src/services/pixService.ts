@@ -1,4 +1,5 @@
 import { PixResponse } from '../types';
+import { getStoredXTrackyData, buildUtmQuery } from '../utils/xTrackyUtils';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
@@ -10,12 +11,18 @@ export async function gerarPix(
   cpf: string,
   phone: string,
   amountCentavos: number,
-  itemName: string,
-  utmQuery?: string
+  itemName: string
 ): Promise<PixResponse> {
   if (!navigator.onLine) {
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
+
+  // Recuperar dados do xTracky armazenados
+  const xTrackyData = getStoredXTrackyData();
+  const utmQuery = xTrackyData ? buildUtmQuery(xTrackyData) : '';
+  
+  console.log('Dados xTracky recuperados:', xTrackyData);
+  console.log('UTM Query construída:', utmQuery);
 
   const requestBody = {
     name,
@@ -25,7 +32,7 @@ export async function gerarPix(
     paymentMethod: 'PIX',
     amount: amountCentavos,
     traceable: true,
-    utmQuery: utmQuery || '',
+    utmQuery,
     items: [
       {
         unitPrice: amountCentavos,
@@ -88,7 +95,8 @@ export async function gerarPix(
       pixQrCode: data.pixQrCode,
       pixCode: data.pixCode,
       status: data.status,
-      id: data.id
+      id: data.id,
+      xTrackyData // Incluir dados do xTracky na resposta para uso posterior
     };
   } catch (error) {
     console.error('Erro ao gerar PIX:', error);
