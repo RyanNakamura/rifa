@@ -13,6 +13,9 @@ export async function gerarPix(
   itemName: string,
   utmQuery?: string
 ): Promise<PixResponse> {
+  // Log para verificar se utmQuery está chegando corretamente
+  console.log('gerarPix recebendo utmQuery:', utmQuery);
+
   if (!navigator.onLine) {
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
