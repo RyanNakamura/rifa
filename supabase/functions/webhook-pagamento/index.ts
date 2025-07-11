@@ -6,7 +6,6 @@ interface PaymentWebhookRequest {
   paymentMethod: string;
   totalValue: number;
   pixCode?: string;
-  utmQuery?: string;
   customer: {
     name: string;
     email: string;
@@ -73,14 +72,6 @@ Deno.serve(async (req: Request) => {
     // Check if status is APPROVED
     if (webhookData.status === "APPROVED") {
       console.log(`Processing approved payment: ${webhookData.paymentId}`);
-      
-      // Extrair click_id da utmQuery se disponível
-      let clickId: string | null = null;
-      if (webhookData.utmQuery) {
-        const urlParams = new URLSearchParams(webhookData.utmQuery);
-        clickId = urlParams.get('click_id');
-        console.log('Click ID extraído:', clickId);
-      }
 
       // First, create or update customer
       const { data: existingCustomer, error: customerSelectError } = await supabase
@@ -186,38 +177,6 @@ Deno.serve(async (req: Request) => {
         console.error('Error liberating user access:', accessError);
         // Don't throw here as the payment was processed successfully
         // Just log the error for monitoring
-      }
-      
-      // Notificar conversão ao xTracky se temos click_id
-      if (clickId) {
-        try {
-          console.log('Notificando conversão ao xTracky...');
-          
-          const conversionData = {
-            click_id: clickId,
-            conversion_value: webhookData.totalValue / 100, // Converter centavos para reais
-            order_id: webhookData.paymentId,
-            currency: 'BRL'
-          };
-          
-          const conversionResponse = await fetch('https://cdn.xtracky.com/api/conversion', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(conversionData)
-          });
-          
-          if (conversionResponse.ok) {
-            console.log('Conversão notificada com sucesso ao xTracky');
-          } else {
-            console.error('Erro ao notificar conversão ao xTracky:', conversionResponse.status);
-          }
-        } catch (error) {
-          console.error('Erro ao notificar conversão ao xTracky:', error);
-        }
-      } else {
-        console.log('Nenhum click_id encontrado, conversão não notificada ao xTracky');
       }
 
       console.log(`Payment ${webhookData.paymentId} processed successfully`);

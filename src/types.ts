@@ -1,5 +1,3 @@
-import { XTrackyData } from './utils/xTrackyUtils';
-
 export interface PixRequest {
   name: string;
   email: string;
@@ -21,5 +19,4 @@ export interface PixResponse {
   pixCode: string;
   status: string;
   id: string;
-  xTrackyData?: XTrackyData | null;
 }

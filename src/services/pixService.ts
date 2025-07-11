@@ -1,34 +1,8 @@
 import { PixResponse } from '../types';
-import { getStoredXTrackyData, buildUtmQuery } from '../utils/xTrackyUtils';
 
 const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
 const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
 const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.getPayment';
-
-// Função para notificar conversão quando pagamento for aprovado
-export async function notifyConversionOnApproval(paymentId: string, totalValue: number): Promise<void> {
-  const xTrackyData = getStoredXTrackyData();
-  
-  if (xTrackyData && xTrackyData.clickId) {
-    console.log('Pagamento aprovado, notificando conversão ao xTracky...');
-    
-    const { notifyXTrackyConversion } = await import('../utils/xTrackyUtils');
-    
-    const success = await notifyXTrackyConversion(
-      xTrackyData.clickId,
-      totalValue / 100, // Converter centavos para reais
-      paymentId
-    );
-    
-    if (success) {
-      console.log('✅ Conversão notificada com sucesso ao xTracky');
-    } else {
-      console.error('❌ Falha ao notificar conversão ao xTracky');
-    }
-  } else {
-    console.log('Nenhum click_id encontrado, conversão não será notificada ao xTracky');
-  }
-}
 
 export async function gerarPix(
   name: string,
@@ -36,18 +10,12 @@ export async function gerarPix(
   cpf: string,
   phone: string,
   amountCentavos: number,
-  itemName: string
+  itemName: string,
+  utmQuery?: string
 ): Promise<PixResponse> {
   if (!navigator.onLine) {
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
-
-  // Recuperar dados do xTracky armazenados
-  const xTrackyData = getStoredXTrackyData();
-  const utmQuery = xTrackyData ? buildUtmQuery(xTrackyData) : '';
-  
-  console.log('Dados xTracky recuperados:', xTrackyData);
-  console.log('UTM Query construída:', utmQuery);
 
   const requestBody = {
     name,
@@ -57,7 +25,7 @@ export async function gerarPix(
     paymentMethod: 'PIX',
     amount: amountCentavos,
     traceable: true,
-    utmQuery,
+    utmQuery: utmQuery || '',
     items: [
       {
         unitPrice: amountCentavos,
@@ -120,8 +88,7 @@ export async function gerarPix(
       pixQrCode: data.pixQrCode,
       pixCode: data.pixCode,
       status: data.status,
-      id: data.id,
-      xTrackyData // Incluir dados do xTracky na resposta para uso posterior
+      id: data.id
     };
   } catch (error) {
     console.error('Erro ao gerar PIX:', error);
