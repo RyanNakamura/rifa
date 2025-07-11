@@ -39,8 +39,7 @@ export async function gerarPix(
   try {
     console.log('Enviando requisição PIX:', {
       url: API_URL,
-      body: requestBody,
-      utmQueryRecebido: utmQuery
+      body: requestBody
     });
 
     const response = await fetch(API_URL, {
