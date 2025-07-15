@@ -657,16 +657,16 @@ function App() {
                   {pkg.numbers} números
                 </div>
                 <div className="text-sm mb-2">
-                  <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold animate-pulse">
+                <div className="text-lg font-semibold mb-2">60 números</div>
                     PROMOCIONAL!
                   </span>
                 </div>
                 <div className="text-sm mb-3">
-                  Apenas R$0,50 por número
+                  Apenas R$0,33 por número
                 </div>
                 
                 <button 
-                  onClick={() => handlePurchaseClick(pkg)}
+                  onClick={() => setQuantidade(60)}
                   className="w-full bg-white text-green-800 font-bold py-2 px-4 rounded-lg hover:bg-green-50 transition-colors duration-200 flex items-center justify-center gap-2"
                 >
                   <Heart className="w-4 h-4" />
