@@ -111,6 +111,7 @@ function App() {
     { price: 40, numbers: 80, popular: true },
     { price: 50, numbers: 100, popular: false },
     { price: 100, numbers: 200, popular: false },
+    { price: 200, numbers: 400, popular: false },
     { price: 400, numbers: 800, popular: false }
   ];
 
