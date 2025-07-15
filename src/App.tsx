@@ -844,13 +844,13 @@ function App() {
 
               <div>
                 <label className="block text-gray-700 font-bold mb-1 text-sm">
-                  Quantas rifas você quer? (mínimo 40)
+                  Telefone *
                 </label>
                 <input
                   type="text"
                   value={purchaseData.telefone}
                   onChange={(e) => handleInputChange('telefone', e.target.value)}
-                  min="40"
+                  placeholder="(11) 99999-9999"
                   maxLength="15"
                   className="w-full p-2.5 border-2 border-gray-300 rounded-lg focus:border-green-500 outline-none text-sm"
                 />
