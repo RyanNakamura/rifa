@@ -52,6 +52,7 @@ function App() {
   const [cpfValidationStatus, setCpfValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
   const [cpfValidationMessage, setCpfValidationMessage] = useState('');
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
+  const [successScreenData, setSuccessScreenData] = useState(null);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -473,6 +474,17 @@ function App() {
         
         if (status === 'APPROVED') {
           setPaymentStatus('approved');
+          // Preparar dados para a tela de sucesso
+          setSuccessScreenData({
+            purchasedNumbers: selectedPackage?.numbers || 20,
+            customerData: {
+              name: userData?.nome || 'Cliente',
+              email: userData?.email || `${userData?.nome?.toLowerCase().replace(/\s+/g, '')}@email.com` || 'cliente@superrifa.com',
+              cpf: cleanCpf(purchaseData.cpf),
+              phone: purchaseData.telefone.replace(/\D/g, '')
+            },
+            utmParams: utmParams
+          });
           setShowSuccessScreen(true);
           clearInterval(interval);
           setStatusCheckInterval(null);
@@ -500,8 +512,14 @@ function App() {
     const userData = cpfValidation.userData;
 
   // Show PaymentSuccessScreen when payment is approved
-  if (paymentStatus === 'APPROVED' && currentStep === 4) {
-    return <PaymentSuccessScreen />;
+  if (showSuccessScreen && successScreenData) {
+    return (
+      <PaymentSuccessScreen 
+        purchasedNumbers={successScreenData.purchasedNumbers}
+        customerData={successScreenData.customerData}
+        utmParams={successScreenData.utmParams}
+      />
+    );
   }
 
   const renderContent = () => {
