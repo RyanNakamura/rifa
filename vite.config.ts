@@ -6,9 +6,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/pix': {
-        target: 'https://app.ghostspaysv1.com/api/v1/transaction.purchase',
+        target: 'https://app.ghostspaysv1.com',
         changeOrigin: true,
-        rewrite: (path) => '',
+        rewrite: (path) => '/api/v1/transaction.purchase',
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             // Adicionar headers de autenticação
@@ -19,12 +19,11 @@ export default defineConfig({
         }
       },
       '/api/pix-status': {
-        target: 'https://app.ghostspaysv1.com/api/v1/transaction.getPayment',
+        target: 'https://app.ghostspaysv1.com',
         changeOrigin: true,
         rewrite: (path) => {
-          // Preservar query parameters para o status
           const url = new URL(path, 'http://localhost');
-          return url.search;
+          return '/api/v1/transaction.getPayment' + url.search;
         },
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
