@@ -3,8 +3,10 @@ import { PixResponse } from '../types';
 const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
 const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
 
-// Sempre usar a URL completa da API
-const API_BASE_URL = 'https://app.ghostspaysv1.com/api/v1';
+// Detectar ambiente e usar proxy em desenvolvimento para evitar CORS
+const API_BASE_URL = import.meta.env.DEV 
+  ? '/api/v1' 
+  : 'https://app.ghostspaysv1.com/api/v1';
 
 const API_URL = `${API_BASE_URL}/transaction.purchase`;
 const STATUS_CHECK_URL = `${API_BASE_URL}/transaction.getPayment`;
@@ -56,8 +58,12 @@ export async function gerarPix(
         'Content-Type': 'application/json',
         'Authorization': SECRET_KEY,
         'X-Public-Key': PUBLIC_KEY,
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Public-Key'
       },
+      mode: 'cors',
       body: JSON.stringify(requestBody)
     });
 
@@ -102,7 +108,7 @@ export async function gerarPix(
   } catch (error) {
     console.error('Erro ao gerar PIX GhostsPay:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor indisponível. Por favor, tente novamente em alguns minutos.');
+      throw new Error('Erro de conectividade. Verifique sua conexão com a internet ou tente novamente em alguns minutos. Se o problema persistir, pode ser um problema de CORS com a API do GhostsPay.');
     }
     throw error;
   }
@@ -127,8 +133,12 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
       headers: {
         'Authorization': SECRET_KEY,
         'X-Public-Key': PUBLIC_KEY,
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Authorization, X-Public-Key'
+      },
+      mode: 'cors'
     });
 
     console.log('Status da resposta de verificação GhostsPay:', response.status);
