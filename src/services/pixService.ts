@@ -1,8 +1,9 @@
 import { PixResponse } from '../types';
 
-const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
-const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
-const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.getPayment';
+const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
+const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
+const API_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.purchase';
+const STATUS_CHECK_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.getPayment';
 
 export async function gerarPix(
   name: string,
@@ -62,9 +63,9 @@ export async function gerarPix(
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw new Error('API não encontrada. Por favor, tente novamente mais tarde.');
+        throw new Error('Endpoint não encontrado na API GhostsPay. Por favor, tente novamente mais tarde.');
       } else if (response.status === 403) {
-        throw new Error('Acesso negado. Verifique se a chave de API está correta.');
+        throw new Error('Acesso negado. Verifique se as credenciais da GhostsPay estão corretas.');
       } else if (response.status === 500) {
         throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
       } else if (response.status === 0) {
@@ -96,7 +97,7 @@ export async function gerarPix(
   } catch (error) {
     console.error('Erro ao gerar PIX:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor indisponível. Por favor, tente novamente em alguns minutos.');
+      throw new Error('Servidor GhostsPay indisponível. Por favor, tente novamente em alguns minutos.');
     }
     throw error;
   }
@@ -150,11 +151,11 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
       return 'PENDING';
     }
 
-    // A API retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
+    // A API GhostsPay retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
     const status = data.status || 'PENDING';
     console.log('Status do pagamento:', status);
     
-    // Mapear possíveis status da API para nossos status internos
+    // Mapear possíveis status da API GhostsPay para nossos status internos
     switch (status.toUpperCase()) {
       case 'APPROVED':
         return 'APPROVED';
