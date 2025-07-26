@@ -1,8 +1,10 @@
 import { PixResponse } from '../types';
 
-const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
-const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.purchase';
-const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction.getPayment';
+const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
+const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
+const API_BASE_URL = 'https://app.ghostspaysv1.com/docs/api/v1';
+const API_URL = `${API_BASE_URL}/transaction.purchase`;
+const STATUS_CHECK_URL = `${API_BASE_URL}/transaction.getPayment`;
 
 export async function gerarPix(
   name: string,
@@ -40,7 +42,7 @@ export async function gerarPix(
   };
 
   try {
-    console.log('Enviando requisição PIX:', {
+    console.log('Enviando requisição PIX para GhostsPay:', {
       url: API_URL,
       body: requestBody
     });
@@ -50,21 +52,22 @@ export async function gerarPix(
       headers: {
         'Content-Type': 'application/json',
         'Authorization': SECRET_KEY,
+        'X-Public-Key': PUBLIC_KEY,
         'Accept': 'application/json'
       },
       body: JSON.stringify(requestBody)
     });
 
-    console.log('Status da resposta:', response.status);
+    console.log('Status da resposta GhostsPay:', response.status);
 
     const responseText = await response.text();
-    console.log('Resposta completa:', responseText);
+    console.log('Resposta completa GhostsPay:', responseText);
 
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('API não encontrada. Por favor, tente novamente mais tarde.');
       } else if (response.status === 403) {
-        throw new Error('Acesso negado. Verifique se a chave de API está correta.');
+        throw new Error('Acesso negado. Verifique se as chaves de API estão corretas.');
       } else if (response.status === 500) {
         throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
       } else if (response.status === 0) {
@@ -83,7 +86,7 @@ export async function gerarPix(
     }
 
     if (!data.pixQrCode || !data.pixCode || !data.status || !data.id) {
-      console.error('Resposta inválida:', data);
+      console.error('Resposta inválida GhostsPay:', data);
       throw new Error('Resposta incompleta do servidor. Por favor, tente novamente.');
     }
 
@@ -94,7 +97,7 @@ export async function gerarPix(
       id: data.id
     };
   } catch (error) {
-    console.error('Erro ao gerar PIX:', error);
+    console.error('Erro ao gerar PIX GhostsPay:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new Error('Servidor indisponível. Por favor, tente novamente em alguns minutos.');
     }
@@ -111,7 +114,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
     // Construir URL com query parameter
     const url = `${STATUS_CHECK_URL}?id=${encodeURIComponent(paymentId)}`;
     
-    console.log('Verificando status do pagamento:', {
+    console.log('Verificando status do pagamento GhostsPay:', {
       url,
       paymentId
     });
@@ -120,11 +123,12 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
       method: 'GET',
       headers: {
         'Authorization': SECRET_KEY,
+        'X-Public-Key': PUBLIC_KEY,
         'Accept': 'application/json'
       }
     });
 
-    console.log('Status da resposta de verificação:', response.status);
+    console.log('Status da resposta de verificação GhostsPay:', response.status);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -140,7 +144,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
     }
 
     const responseText = await response.text();
-    console.log('Resposta da verificação de status:', responseText);
+    console.log('Resposta da verificação de status GhostsPay:', responseText);
 
     let data;
     try {
@@ -152,7 +156,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
 
     // A API retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
     const status = data.status || 'PENDING';
-    console.log('Status do pagamento:', status);
+    console.log('Status do pagamento GhostsPay:', status);
     
     // Mapear possíveis status da API para nossos status internos
     switch (status.toUpperCase()) {
@@ -169,7 +173,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
         return 'PENDING';
     }
   } catch (error) {
-    console.error('Erro ao verificar status do pagamento:', error);
+    console.error('Erro ao verificar status do pagamento GhostsPay:', error);
     // Em caso de erro, retornar PENDING para continuar o polling
     return 'PENDING';
   }
