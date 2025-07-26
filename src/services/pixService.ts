@@ -1,14 +1,8 @@
 import { PixResponse } from '../types';
 
-// Configuração das URLs da API
-const GHOSTSPAY_API_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.purchase';
-const GHOSTSPAY_STATUS_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.getPayment';
-const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
-const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
-
-// URLs da API - usar Edge Functions em produção, API direta em desenvolvimento
-const PIX_API_URL = import.meta.env.DEV ? GHOSTSPAY_API_URL : '/api/pix';
-const PIX_STATUS_URL = import.meta.env.DEV ? GHOSTSPAY_STATUS_URL : '/api/pix-status';
+// URLs da API - sempre usar rotas internas (proxy em dev, Edge Functions em prod)
+const PIX_API_URL = '/api/pix';
+const PIX_STATUS_URL = '/api/pix-status';
 
 export async function gerarPix(
   name: string,
@@ -44,17 +38,10 @@ export async function gerarPix(
     ]
   };
 
-  // Headers para desenvolvimento (API direta) vs produção (Edge Functions)
-  const headers: Record<string, string> = {
+  // Headers simples - autenticação é feita pelo proxy/backend
+  const headers = {
     'Content-Type': 'application/json'
   };
-
-  if (import.meta.env.DEV) {
-    // Em desenvolvimento, usar headers da API direta
-    headers['Authorization'] = SECRET_KEY;
-    headers['X-Public-Key'] = PUBLIC_KEY;
-    headers['Accept'] = 'application/json';
-  }
 
   try {
     console.log('Enviando requisição PIX para backend:', {
@@ -114,22 +101,11 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    let url: string;
-    let headers: Record<string, string> = {
+    const url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
+    const headers = {
       'Content-Type': 'application/json'
     };
 
-    if (import.meta.env.DEV) {
-      // Em desenvolvimento, usar API direta
-      url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
-      headers['Authorization'] = SECRET_KEY;
-      headers['X-Public-Key'] = PUBLIC_KEY;
-      headers['Accept'] = 'application/json';
-    } else {
-      // Em produção, usar Edge Functions
-      url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
-    }
-    
     console.log('Verificando status do pagamento:', {
       url,
       paymentId

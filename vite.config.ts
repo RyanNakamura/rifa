@@ -3,6 +3,40 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/api/pix': {
+        target: 'https://app.ghostspaysv1.com/api/v1/transaction.purchase',
+        changeOrigin: true,
+        rewrite: (path) => '',
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Adicionar headers de autenticação
+            proxyReq.setHeader('Authorization', 'c6b41266-2357-4a6c-8e07-aa3873690c1a');
+            proxyReq.setHeader('X-Public-Key', '4307a311-e352-47cd-9d24-a3c05e90db0d');
+            proxyReq.setHeader('Accept', 'application/json');
+          });
+        }
+      },
+      '/api/pix-status': {
+        target: 'https://app.ghostspaysv1.com/api/v1/transaction.getPayment',
+        changeOrigin: true,
+        rewrite: (path) => {
+          // Preservar query parameters para o status
+          const url = new URL(path, 'http://localhost');
+          return url.search;
+        },
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Adicionar headers de autenticação
+            proxyReq.setHeader('Authorization', 'c6b41266-2357-4a6c-8e07-aa3873690c1a');
+            proxyReq.setHeader('X-Public-Key', '4307a311-e352-47cd-9d24-a3c05e90db0d');
+            proxyReq.setHeader('Accept', 'application/json');
+          });
+        }
+      }
+    }
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
