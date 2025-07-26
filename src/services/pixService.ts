@@ -3,10 +3,8 @@ import { PixResponse } from '../types';
 const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
 const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
 
-// Use proxy em desenvolvimento e URL completa em produção
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api' 
-  : 'https://app.ghostspaysv1.com/api/v1';
+// Sempre usar a URL completa da API
+const API_BASE_URL = 'https://app.ghostspaysv1.com/api/v1';
 
 const API_URL = `${API_BASE_URL}/transaction.purchase`;
 const STATUS_CHECK_URL = `${API_BASE_URL}/transaction.getPayment`;
