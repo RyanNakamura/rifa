@@ -1,8 +1,8 @@
 import { PixResponse } from '../types';
 
-// URLs da API - sempre usar rotas internas (proxy em dev, Edge Functions em prod)
-const PIX_API_URL = '/api/pix';
-const PIX_STATUS_URL = '/api/pix-status';
+// URLs da API - proxy para o backend Node.js
+const PIX_API_URL = '/api/ghostspay/pix';
+const PIX_STATUS_URL = '/api/ghostspay/pix-status';
 
 export async function gerarPix(
   name: string,
@@ -44,7 +44,7 @@ export async function gerarPix(
   };
 
   try {
-    console.log('Enviando requisição PIX para backend:', {
+    console.log('Enviando requisição PIX para backend Node.js:', {
       url: PIX_API_URL,
       body: requestBody
     });
@@ -55,11 +55,11 @@ export async function gerarPix(
       body: JSON.stringify(requestBody)
     });
 
-    console.log('Status da resposta backend:', response.status);
+    console.log('Status da resposta do backend Node.js:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-      console.error('Erro do backend:', errorData);
+      console.error('Erro do backend Node.js:', errorData);
       
       if (response.status === 404) {
         throw new Error('API não encontrada. Por favor, tente novamente mais tarde.');
@@ -73,10 +73,10 @@ export async function gerarPix(
     }
 
     const data = await response.json();
-    console.log('Resposta do backend:', data);
+    console.log('Resposta do backend Node.js:', data);
 
     if (!data.pixQrCode || !data.pixCode || !data.status || !data.id) {
-      console.error('Resposta inválida do backend:', data);
+      console.error('Resposta inválida do backend Node.js:', data);
       throw new Error('Resposta incompleta do servidor. Por favor, tente novamente.');
     }
 
