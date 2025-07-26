@@ -7,14 +7,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://app.ghostspaysv1.com',
+        target: 'http://localhost:54321/functions/v1',
         changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
-  },
-  optimizeDeps: {
-    exclude: ['lucide-react'],
   }
 });

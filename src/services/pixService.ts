@@ -1,15 +1,8 @@
 import { PixResponse } from '../types';
 
-const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
-const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
-
-// Detectar ambiente e usar proxy em desenvolvimento para evitar CORS
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api/v1' 
-  : 'https://app.ghostspaysv1.com/api/v1';
-
-const API_URL = `${API_BASE_URL}/transaction.purchase`;
-const STATUS_CHECK_URL = `${API_BASE_URL}/transaction.getPayment`;
+// Usar as rotas do backend (Edge Functions) em vez da API direta
+const PIX_API_URL = '/api/pix';
+const PIX_STATUS_URL = '/api/pix-status';
 
 export async function gerarPix(
   name: string,
@@ -20,7 +13,6 @@ export async function gerarPix(
   itemName: string,
   utmQuery?: string
 ): Promise<PixResponse> {
-  // Log para verificar se utmQuery está chegando corretamente
   console.log('gerarPix recebendo utmQuery:', utmQuery);
 
   if (!navigator.onLine) {
@@ -32,7 +24,7 @@ export async function gerarPix(
     email,
     cpf,
     phone,
-    paymentMethod: 'PIX',
+    paymentMethod: 'PIX' as const,
     amount: amountCentavos,
     traceable: true,
     utmQuery: utmQuery || '',
@@ -47,55 +39,41 @@ export async function gerarPix(
   };
 
   try {
-    console.log('Enviando requisição PIX para GhostsPay:', {
-      url: API_URL,
+    console.log('Enviando requisição PIX para backend:', {
+      url: PIX_API_URL,
       body: requestBody
     });
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(PIX_API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': SECRET_KEY,
-        'X-Public-Key': PUBLIC_KEY,
-        'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Public-Key'
+        'Content-Type': 'application/json'
       },
-      mode: 'cors',
       body: JSON.stringify(requestBody)
     });
 
-    console.log('Status da resposta GhostsPay:', response.status);
-
-    const responseText = await response.text();
-    console.log('Resposta completa GhostsPay:', responseText);
+    console.log('Status da resposta backend:', response.status);
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+      console.error('Erro do backend:', errorData);
+      
       if (response.status === 404) {
         throw new Error('API não encontrada. Por favor, tente novamente mais tarde.');
       } else if (response.status === 403) {
-        throw new Error('Acesso negado. Verifique se as chaves de API estão corretas.');
+        throw new Error('Acesso negado. Por favor, tente novamente.');
       } else if (response.status === 500) {
-        throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
-      } else if (response.status === 0) {
-        throw new Error('Não foi possível conectar ao servidor. Verifique se o servidor está online.');
+        throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente.');
       } else {
-        const errorData = JSON.parse(responseText);
-        throw new Error(`Erro no servidor: ${errorData.message || 'Erro desconhecido'}`);
+        throw new Error(errorData.error || 'Erro no servidor. Por favor, tente novamente.');
       }
     }
 
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      throw new Error('Erro ao processar resposta do servidor. Por favor, tente novamente.');
-    }
+    const data = await response.json();
+    console.log('Resposta do backend:', data);
 
     if (!data.pixQrCode || !data.pixCode || !data.status || !data.id) {
-      console.error('Resposta inválida GhostsPay:', data);
+      console.error('Resposta inválida do backend:', data);
       throw new Error('Resposta incompleta do servidor. Por favor, tente novamente.');
     }
 
@@ -106,9 +84,9 @@ export async function gerarPix(
       id: data.id
     };
   } catch (error) {
-    console.error('Erro ao gerar PIX GhostsPay:', error);
+    console.error('Erro ao gerar PIX:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Erro de conectividade. Verifique sua conexão com a internet ou tente novamente em alguns minutos. Se o problema persistir, pode ser um problema de CORS com a API do GhostsPay.');
+      throw new Error('Erro de conectividade. Verifique sua conexão com a internet e tente novamente.');
     }
     throw error;
   }
@@ -120,10 +98,9 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    // Construir URL com query parameter
-    const url = `${STATUS_CHECK_URL}?id=${encodeURIComponent(paymentId)}`;
+    const url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
     
-    console.log('Verificando status do pagamento GhostsPay:', {
+    console.log('Verificando status do pagamento:', {
       url,
       paymentId
     });
@@ -131,62 +108,26 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': SECRET_KEY,
-        'X-Public-Key': PUBLIC_KEY,
-        'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Authorization, X-Public-Key'
-      },
-      mode: 'cors'
+        'Content-Type': 'application/json'
+      }
     });
 
-    console.log('Status da resposta de verificação GhostsPay:', response.status);
+    console.log('Status da resposta de verificação:', response.status);
 
     if (!response.ok) {
-      if (response.status === 404) {
-        console.log('Pagamento não encontrado, retornando PENDING');
-        return 'PENDING';
-      } else if (response.status === 403) {
-        console.error('Acesso negado ao verificar status');
-        return 'PENDING';
-      } else {
-        console.error(`Erro ao verificar status: ${response.status}`);
-        return 'PENDING';
-      }
-    }
-
-    const responseText = await response.text();
-    console.log('Resposta da verificação de status GhostsPay:', responseText);
-
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      console.error('Erro ao parsear resposta de status:', e);
+      console.error(`Erro ao verificar status: ${response.status}`);
       return 'PENDING';
     }
 
-    // A API retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
+    const data = await response.json();
+    console.log('Resposta da verificação de status:', data);
+
     const status = data.status || 'PENDING';
-    console.log('Status do pagamento GhostsPay:', status);
+    console.log('Status do pagamento:', status);
     
-    // Mapear possíveis status da API para nossos status internos
-    switch (status.toUpperCase()) {
-      case 'APPROVED':
-        return 'APPROVED';
-      case 'PENDING':
-        return 'PENDING';
-      case 'CANCELLED':
-      case 'CANCELED':
-        return 'CANCELLED';
-      case 'EXPIRED':
-        return 'EXPIRED';
-      default:
-        return 'PENDING';
-    }
+    return status;
   } catch (error) {
-    console.error('Erro ao verificar status do pagamento GhostsPay:', error);
+    console.error('Erro ao verificar status do pagamento:', error);
     // Em caso de erro, retornar PENDING para continuar o polling
     return 'PENDING';
   }
