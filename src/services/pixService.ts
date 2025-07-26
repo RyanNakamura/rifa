@@ -2,8 +2,8 @@ import { PixResponse } from '../types';
 
 const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
 const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
-const API_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.purchase';
-const STATUS_CHECK_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.getPayment';
+const API_URL = 'https://app.ghostspaysv1.com/api/v1/transaction/purchase';
+const STATUS_CHECK_URL = 'https://app.ghostspaysv1.com/api/v1/transaction/getPayment';
 
 export async function gerarPix(
   name: string,
