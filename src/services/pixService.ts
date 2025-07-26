@@ -1,8 +1,10 @@
 import { PixResponse } from '../types';
 
-// URLs da API - proxy para o backend Node.js
-const PIX_API_URL = '/api/ghostspay/pix';
-const PIX_STATUS_URL = '/api/ghostspay/pix-status';
+const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
+const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
+const API_BASE_URL = 'https://app.ghostspaysv1.com/docs/api/v1';
+const API_URL = `${API_BASE_URL}/transaction.purchase`;
+const STATUS_CHECK_URL = `${API_BASE_URL}/transaction.getPayment`;
 
 export async function gerarPix(
   name: string,
@@ -13,6 +15,7 @@ export async function gerarPix(
   itemName: string,
   utmQuery?: string
 ): Promise<PixResponse> {
+  // Log para verificar se utmQuery está chegando corretamente
   console.log('gerarPix recebendo utmQuery:', utmQuery);
 
   if (!navigator.onLine) {
@@ -24,7 +27,7 @@ export async function gerarPix(
     email,
     cpf,
     phone,
-    paymentMethod: 'PIX' as const,
+    paymentMethod: 'PIX',
     amount: amountCentavos,
     traceable: true,
     utmQuery: utmQuery || '',
@@ -38,45 +41,52 @@ export async function gerarPix(
     ]
   };
 
-  // Headers simples - autenticação é feita pelo proxy/backend
-  const headers = {
-    'Content-Type': 'application/json'
-  };
-
   try {
-    console.log('Enviando requisição PIX para backend Node.js:', {
-      url: PIX_API_URL,
+    console.log('Enviando requisição PIX para GhostsPay:', {
+      url: API_URL,
       body: requestBody
     });
 
-    const response = await fetch(PIX_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': SECRET_KEY,
+        'X-Public-Key': PUBLIC_KEY,
+        'Accept': 'application/json'
+      },
       body: JSON.stringify(requestBody)
     });
 
-    console.log('Status da resposta do backend Node.js:', response.status);
+    console.log('Status da resposta GhostsPay:', response.status);
+
+    const responseText = await response.text();
+    console.log('Resposta completa GhostsPay:', responseText);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-      console.error('Erro do backend Node.js:', errorData);
-      
       if (response.status === 404) {
         throw new Error('API não encontrada. Por favor, tente novamente mais tarde.');
       } else if (response.status === 403) {
-        throw new Error('Acesso negado. Por favor, tente novamente.');
+        throw new Error('Acesso negado. Verifique se as chaves de API estão corretas.');
       } else if (response.status === 500) {
-        throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente.');
+        throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
+      } else if (response.status === 0) {
+        throw new Error('Não foi possível conectar ao servidor. Verifique se o servidor está online.');
       } else {
-        throw new Error(errorData.error || 'Erro no servidor. Por favor, tente novamente.');
+        const errorData = JSON.parse(responseText);
+        throw new Error(`Erro no servidor: ${errorData.message || 'Erro desconhecido'}`);
       }
     }
 
-    const data = await response.json();
-    console.log('Resposta do backend Node.js:', data);
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      throw new Error('Erro ao processar resposta do servidor. Por favor, tente novamente.');
+    }
 
     if (!data.pixQrCode || !data.pixCode || !data.status || !data.id) {
-      console.error('Resposta inválida do backend Node.js:', data);
+      console.error('Resposta inválida GhostsPay:', data);
       throw new Error('Resposta incompleta do servidor. Por favor, tente novamente.');
     }
 
@@ -87,9 +97,9 @@ export async function gerarPix(
       id: data.id
     };
   } catch (error) {
-    console.error('Erro ao gerar PIX:', error);
+    console.error('Erro ao gerar PIX GhostsPay:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Erro de conectividade. Verifique sua conexão com a internet e tente novamente.');
+      throw new Error('Servidor indisponível. Por favor, tente novamente em alguns minutos.');
     }
     throw error;
   }
@@ -101,37 +111,69 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    const url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-
-    console.log('Verificando status do pagamento:', {
+    // Construir URL com query parameter
+    const url = `${STATUS_CHECK_URL}?id=${encodeURIComponent(paymentId)}`;
+    
+    console.log('Verificando status do pagamento GhostsPay:', {
       url,
       paymentId
     });
 
     const response = await fetch(url, {
       method: 'GET',
-      headers
+      headers: {
+        'Authorization': SECRET_KEY,
+        'X-Public-Key': PUBLIC_KEY,
+        'Accept': 'application/json'
+      }
     });
 
-    console.log('Status da resposta de verificação:', response.status);
+    console.log('Status da resposta de verificação GhostsPay:', response.status);
 
     if (!response.ok) {
-      console.error(`Erro ao verificar status: ${response.status}`);
+      if (response.status === 404) {
+        console.log('Pagamento não encontrado, retornando PENDING');
+        return 'PENDING';
+      } else if (response.status === 403) {
+        console.error('Acesso negado ao verificar status');
+        return 'PENDING';
+      } else {
+        console.error(`Erro ao verificar status: ${response.status}`);
+        return 'PENDING';
+      }
+    }
+
+    const responseText = await response.text();
+    console.log('Resposta da verificação de status GhostsPay:', responseText);
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Erro ao parsear resposta de status:', e);
       return 'PENDING';
     }
 
-    const data = await response.json();
-    console.log('Resposta da verificação de status:', data);
-
+    // A API retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
     const status = data.status || 'PENDING';
-    console.log('Status do pagamento:', status);
+    console.log('Status do pagamento GhostsPay:', status);
     
-    return status;
+    // Mapear possíveis status da API para nossos status internos
+    switch (status.toUpperCase()) {
+      case 'APPROVED':
+        return 'APPROVED';
+      case 'PENDING':
+        return 'PENDING';
+      case 'CANCELLED':
+      case 'CANCELED':
+        return 'CANCELLED';
+      case 'EXPIRED':
+        return 'EXPIRED';
+      default:
+        return 'PENDING';
+    }
   } catch (error) {
-    console.error('Erro ao verificar status do pagamento:', error);
+    console.error('Erro ao verificar status do pagamento GhostsPay:', error);
     // Em caso de erro, retornar PENDING para continuar o polling
     return 'PENDING';
   }

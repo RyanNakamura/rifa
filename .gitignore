@@ -1,8 +1,2 @@
 node_modules/
 .env
-dist-ssr
-*.local
-
-# Backend environment variables
-server/.env.backend
-server/node_modules
