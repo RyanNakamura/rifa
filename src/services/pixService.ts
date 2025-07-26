@@ -1,8 +1,14 @@
 import { PixResponse } from '../types';
 
-// Usar as rotas do backend (Edge Functions) em vez da API direta
-const PIX_API_URL = '/api/pix';
-const PIX_STATUS_URL = '/api/pix-status';
+// Configuração das URLs da API
+const GHOSTSPAY_API_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.purchase';
+const GHOSTSPAY_STATUS_URL = 'https://app.ghostspaysv1.com/api/v1/transaction.getPayment';
+const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
+const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
+
+// URLs da API - usar Edge Functions em produção, API direta em desenvolvimento
+const PIX_API_URL = import.meta.env.DEV ? GHOSTSPAY_API_URL : '/api/pix';
+const PIX_STATUS_URL = import.meta.env.DEV ? GHOSTSPAY_STATUS_URL : '/api/pix-status';
 
 export async function gerarPix(
   name: string,
@@ -38,6 +44,18 @@ export async function gerarPix(
     ]
   };
 
+  // Headers para desenvolvimento (API direta) vs produção (Edge Functions)
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+
+  if (import.meta.env.DEV) {
+    // Em desenvolvimento, usar headers da API direta
+    headers['Authorization'] = SECRET_KEY;
+    headers['X-Public-Key'] = PUBLIC_KEY;
+    headers['Accept'] = 'application/json';
+  }
+
   try {
     console.log('Enviando requisição PIX para backend:', {
       url: PIX_API_URL,
@@ -46,9 +64,7 @@ export async function gerarPix(
 
     const response = await fetch(PIX_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify(requestBody)
     });
 
@@ -98,7 +114,21 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    const url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
+    let url: string;
+    let headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (import.meta.env.DEV) {
+      // Em desenvolvimento, usar API direta
+      url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
+      headers['Authorization'] = SECRET_KEY;
+      headers['X-Public-Key'] = PUBLIC_KEY;
+      headers['Accept'] = 'application/json';
+    } else {
+      // Em produção, usar Edge Functions
+      url = `${PIX_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
+    }
     
     console.log('Verificando status do pagamento:', {
       url,
@@ -107,9 +137,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
 
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers
     });
 
     console.log('Status da resposta de verificação:', response.status);
