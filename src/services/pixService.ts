@@ -1,9 +1,9 @@
 import { PixResponse } from '../types';
 
-const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
-const PUBLIC_KEY = '4456e63a-ee3e-4f21-9cbb-7f3eba55448c';
-const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction/purchase';
-const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction/getPayment';
+const SECRET_KEY = 'c6b41266-2357-4a6c-8e07-aa3873690c1a';
+const PUBLIC_KEY = '4307a311-e352-47cd-9d24-a3c05e90db0d';
+const API_URL = 'https://app.ghostspaysv1.com/api/v1/transaction/purchase';
+const STATUS_CHECK_URL = 'https://app.ghostspaysv1.com/api/v1/transaction/getPayment';
 
 export async function gerarPix(
   name: string,
@@ -65,9 +65,9 @@ export async function gerarPix(
       if (response.status === 404) {
         throw new Error('Endpoint não encontrado na API GhostsPay. Por favor, tente novamente mais tarde.');
       } else if (response.status === 403) {
-        throw new Error('Acesso negado. Verifique se as credenciais do RushPay estão corretas.');
+        throw new Error('Acesso negado. Verifique se as credenciais da GhostsPay estão corretas.');
       } else if (response.status === 500) {
-        throw new Error('Erro no servidor RushPay. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
+        throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
       } else if (response.status === 0) {
         throw new Error('Não foi possível conectar ao servidor. Verifique se o servidor está online.');
       } else {
@@ -97,7 +97,7 @@ export async function gerarPix(
   } catch (error) {
     console.error('Erro ao gerar PIX:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor RushPay indisponível. Por favor, tente novamente em alguns minutos.');
+      throw new Error('Servidor GhostsPay indisponível. Por favor, tente novamente em alguns minutos.');
     }
     throw error;
   }
