@@ -1,9 +1,9 @@
 import { PixResponse } from '../types';
 
-// Use Supabase Edge Functions instead of direct API calls
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const GENERATE_PIX_URL = `${SUPABASE_URL}/functions/v1/generate-pix`;
-const CHECK_STATUS_URL = `${SUPABASE_URL}/functions/v1/check-payment-status`;
+const SECRET_KEY = 'ada7f14f-f602-47be-bdd9-d14f559c76e5';
+const PUBLIC_KEY = '4456e63a-ee3e-4f21-9cbb-7f3eba55448c';
+const API_URL = 'https://pay.rushpayoficial.com/api/v1/transaction/purchase';
+const STATUS_CHECK_URL = 'https://pay.rushpayoficial.com/api/v1/transaction/getPayment';
 
 export async function gerarPix(
   name: string,
@@ -14,6 +14,9 @@ export async function gerarPix(
   itemName: string,
   utmQuery?: string
 ): Promise<PixResponse> {
+  // Log para verificar se utmQuery está chegando corretamente
+  console.log('gerarPix recebendo utmQuery:', utmQuery);
+
   if (!navigator.onLine) {
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
@@ -38,26 +41,39 @@ export async function gerarPix(
   };
 
   try {
-    const response = await fetch(GENERATE_PIX_URL, {
+    console.log('Enviando requisição PIX:', {
+      url: API_URL,
+      body: requestBody
+    });
+
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': SECRET_KEY,
         'Accept': 'application/json'
       },
       body: JSON.stringify(requestBody)
     });
 
+    console.log('Status da resposta:', response.status);
+
     const responseText = await response.text();
+    console.log('Resposta completa:', responseText);
 
     if (!response.ok) {
-      let errorMessage = 'Erro no servidor de pagamento';
-      try {
+      if (response.status === 404) {
+        throw new Error('Endpoint não encontrado na API GhostsPay. Por favor, tente novamente mais tarde.');
+      } else if (response.status === 403) {
+        throw new Error('Acesso negado. Verifique se as credenciais do RushPay estão corretas.');
+      } else if (response.status === 500) {
+        throw new Error('Erro no servidor RushPay. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
+      } else if (response.status === 0) {
+        throw new Error('Não foi possível conectar ao servidor. Verifique se o servidor está online.');
+      } else {
         const errorData = JSON.parse(responseText);
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        // Use default error message
+        throw new Error(`Erro no servidor: ${errorData.message || 'Erro desconhecido'}`);
       }
-      throw new Error(errorMessage);
     }
 
     let data;
@@ -81,7 +97,7 @@ export async function gerarPix(
   } catch (error) {
     console.error('Erro ao gerar PIX:', error);
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor de pagamento indisponível. Por favor, tente novamente em alguns minutos.');
+      throw new Error('Servidor RushPay indisponível. Por favor, tente novamente em alguns minutos.');
     }
     throw error;
   }
@@ -93,21 +109,39 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
   }
 
   try {
-    const url = `${CHECK_STATUS_URL}?id=${encodeURIComponent(paymentId)}`;
+    // Construir URL com query parameter
+    const url = `${STATUS_CHECK_URL}?id=${encodeURIComponent(paymentId)}`;
+    
+    console.log('Verificando status do pagamento:', {
+      url,
+      paymentId
+    });
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
+        'Authorization': SECRET_KEY,
         'Accept': 'application/json'
       }
     });
 
+    console.log('Status da resposta de verificação:', response.status);
+
     if (!response.ok) {
-      console.error(`Erro ao verificar status: ${response.status}`);
-      return 'PENDING';
+      if (response.status === 404) {
+        console.log('Pagamento não encontrado, retornando PENDING');
+        return 'PENDING';
+      } else if (response.status === 403) {
+        console.error('Acesso negado ao verificar status');
+        return 'PENDING';
+      } else {
+        console.error(`Erro ao verificar status: ${response.status}`);
+        return 'PENDING';
+      }
     }
 
     const responseText = await response.text();
+    console.log('Resposta da verificação de status:', responseText);
 
     let data;
     try {
@@ -117,9 +151,27 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
       return 'PENDING';
     }
 
-    return data.status || 'PENDING';
+    // A API GhostsPay retorna um objeto com: { "id": "string", "status": "PENDING", "method": "PIX", ... }
+    const status = data.status || 'PENDING';
+    console.log('Status do pagamento:', status);
+    
+    // Mapear possíveis status da API GhostsPay para nossos status internos
+    switch (status.toUpperCase()) {
+      case 'APPROVED':
+        return 'APPROVED';
+      case 'PENDING':
+        return 'PENDING';
+      case 'CANCELLED':
+      case 'CANCELED':
+        return 'CANCELLED';
+      case 'EXPIRED':
+        return 'EXPIRED';
+      default:
+        return 'PENDING';
+    }
   } catch (error) {
     console.error('Erro ao verificar status do pagamento:', error);
+    // Em caso de erro, retornar PENDING para continuar o polling
     return 'PENDING';
   }
 }
