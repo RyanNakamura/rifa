@@ -57,6 +57,10 @@ function App() {
   const [successScreenData, setSuccessScreenData] = useState(null);
   const [showOrderBump, setShowOrderBump] = useState(false);
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+  
+  // Calcular valores do order bump
+  const orderBumpAmount = selectedNumbers * 100 + 1000; // Valor original + R$10,00
+  const orderBumpItemName = `${selectedNumbers + 100} rifas - Super Rifa`;
   const [isProcessingOrderBump, setIsProcessingOrderBump] = useState(false);
   
   const [timeLeft, setTimeLeft] = useState({
@@ -1175,10 +1179,10 @@ function App() {
                   {/* Progress Bar */}
                   <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
                     <div 
-          const orderBumpAmount = selectedNumbers * 100 + 1000; // Valor original + R$10,00
-          const orderBumpItemName = `${selectedNumbers + 100} rifas - Super Rifa`;
-                          ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse' 
-                          : 'bg-gradient-to-r from-white to-yellow-300'
+                    className={selectedNumbers > 0 
+                      ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse'
+                      : 'bg-gradient-to-r from-white to-yellow-300'
+                    }
                       }`}
                       style={{ width: `${progressPercentage}%` }}
                     />
