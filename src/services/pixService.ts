@@ -129,14 +129,23 @@ export async function gerarPix(
     const status = data.payment_status || data.status || 'pending';
     const id = data.hash || data.id || data.transaction_id;
 
+    // Debug dos campos encontrados
+    console.log('Campos extraídos:', {
+      pixQrCode,
+      pixCode,
+      status,
+      id,
+      pixObject: data.pix
+    });
+
     if (!pixQrCode) {
-      console.error('Resposta incompleta da NitroPagamentos - faltam dados do PIX:', data);
-      throw new Error('Resposta incompleta do servidor - QR Code do PIX não encontrado.');
+      console.error('QR Code não encontrado. Dados do PIX:', data.pix);
+      throw new Error('QR Code do PIX não encontrado na resposta do servidor.');
     }
 
     if (!pixCode) {
-      console.error('Resposta incompleta da NitroPagamentos - código PIX não encontrado:', data);
-      throw new Error('Resposta incompleta do servidor - código PIX não encontrado.');
+      console.error('Código PIX não encontrado. Dados do PIX:', data.pix);
+      throw new Error('Código PIX não encontrado na resposta do servidor.');
     }
 
     if (!id) {
@@ -222,17 +231,21 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
       case 'approved':
       case 'paid':
       case 'completed':
+      case 'success':
         return 'APPROVED';
       case 'pending':
       case 'waiting_payment':
       case 'processing':
+      case 'created':
         return 'PENDING';
       case 'cancelled':
       case 'canceled':
       case 'failed':
+      case 'rejected':
         return 'CANCELLED';
       case 'expired':
       case 'timeout':
+      case 'overdue':
         return 'EXPIRED';
       default:
         console.log(`Status desconhecido da NitroPagamentos: ${status}, retornando PENDING`);

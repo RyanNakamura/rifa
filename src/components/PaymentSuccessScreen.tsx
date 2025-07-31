@@ -247,11 +247,21 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
           {/* QR Code */}
           <div className="text-center mb-6">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
-              <img 
-                src={boostPixData.pixQrCode} 
-                alt="QR Code PIX Boost" 
-                className="w-48 h-48 mx-auto"
-              />
+              {boostPixData.pixQrCode ? (
+                <img 
+                  src={boostPixData.pixQrCode} 
+                  alt="QR Code PIX Boost" 
+                  className="w-48 h-48 mx-auto"
+                  onError={(e) => {
+                    console.error('Erro ao carregar QR Code:', boostPixData.pixQrCode);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-48 h-48 mx-auto flex items-center justify-center bg-gray-100 text-gray-500">
+                  QR Code não disponível
+                </div>
+              )}
             </div>
             <p className="text-sm text-gray-600 mt-2">
               Escaneie o QR Code com seu app do banco
