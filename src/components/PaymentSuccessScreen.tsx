@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import QRCode from 'qrcode.react';
 import { gerarPix } from '../services/pixService';
 import { verificarStatusPagamento } from '../services/pixService';
 import { Copy, Download, X } from 'lucide-react';
@@ -248,21 +247,15 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
           {/* QR Code */}
           <div className="text-center mb-6">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
-              {boostPixData.pixCode ? (
-                <QRCode 
-                  value={boostPixData.pixCode}
-                  size={192}
-                  level="M"
-                  includeMargin={true}
-                />
-              ) : (
-                <div className="w-48 h-48 mx-auto flex items-center justify-center bg-gray-100 text-gray-500">
-                  QR Code não disponível
+              <div className="w-48 h-48 mx-auto flex items-center justify-center bg-gray-100 text-gray-500">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📱</div>
+                  <div className="text-sm">Use o código PIX abaixo</div>
                 </div>
-              )}
+              </div>
             </div>
             <p className="text-sm text-gray-600 mt-2">
-              Escaneie o QR Code com seu app do banco
+              Copie o código PIX abaixo e cole no seu app do banco
             </p>
           </div>
 
