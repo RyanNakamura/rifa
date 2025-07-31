@@ -23,6 +23,28 @@ export async function gerarPix(
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
 
+  // Parsear UTMs da query string
+  const utmParams = {
+    utm_source: null,
+    utm_medium: null,
+    utm_campaign: null,
+    utm_term: null,
+    utm_content: null,
+    click_id: null
+  };
+
+  if (utmQuery && utmQuery.trim() !== '') {
+    const params = new URLSearchParams(utmQuery);
+    utmParams.utm_source = params.get('utm_source');
+    utmParams.utm_medium = params.get('utm_medium');
+    utmParams.utm_campaign = params.get('utm_campaign');
+    utmParams.utm_term = params.get('utm_term');
+    utmParams.utm_content = params.get('utm_content');
+    utmParams.click_id = params.get('click_id');
+  }
+
+  console.log('UTMs parseados para envio no corpo da requisição:', utmParams);
+
   // Construir a postback_url com UTMs se disponíveis
   let postbackUrl = DEFAULT_POSTBACK_URL;
   if (utmQuery && utmQuery.trim() !== '') {
@@ -37,6 +59,11 @@ export async function gerarPix(
     amount: amountCentavos,
     offer_hash: DEFAULT_OFFER_HASH,
     payment_method: 'pix',
+    utm_source: utmParams.utm_source,
+    utm_medium: utmParams.utm_medium,
+    utm_campaign: utmParams.utm_campaign,
+    utm_term: utmParams.utm_term,
+    utm_content: utmParams.utm_content,
     customer: {
       name: name,
       email: email,
