@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
 exports.handler = async (event, context) => {
   // Headers CORS
   const headers = {
@@ -41,74 +39,20 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Inicializar cliente Supabase (se você estiver usando)
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Processar webhook da NitroPagamentos
+    console.log('Processando webhook da NitroPagamentos:', {
+      transaction_id: payload.hash,
+      status: payload.status,
+      customer: payload.customer
+    });
 
-    if (supabaseUrl && supabaseServiceKey) {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-      // Mapear status da NitroPagamentos para status interno
-      let internalStatus = 'pending';
-      switch (payload.status.toLowerCase()) {
-        case 'approved':
-        case 'paid':
-        case 'completed':
-          internalStatus = 'approved';
-          break;
-        case 'pending':
-        case 'waiting_payment':
-        case 'processing':
-          internalStatus = 'pending';
-          break;
-        case 'cancelled':
-        case 'canceled':
-        case 'failed':
-          internalStatus = 'cancelled';
-          break;
-        case 'expired':
-        case 'timeout':
-          internalStatus = 'expired';
-          break;
-      }
-
-      // Atualizar status da transação no banco de dados
-      const { data, error } = await supabase
-        .from('transactions')
-        .update({ 
-          status: internalStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('payment_id', payload.hash)
-        .select();
-
-      if (error) {
-        console.error('Erro ao atualizar transação no Supabase:', error);
-        // Não retornar erro para não fazer a NitroPagamentos reenviar o webhook
-      } else {
-        console.log('Transação atualizada com sucesso:', data);
-      }
-
-      // Se o pagamento foi aprovado, executar lógica adicional
-      if (internalStatus === 'approved' && payload.customer) {
-        try {
-          // Chamar função para liberar acesso ao usuário
-          const { error: accessError } = await supabase.rpc('liberar_acesso_ao_usuario', {
-            user_email: payload.customer.email,
-            p_payment_id: payload.hash
-          });
-
-          if (accessError) {
-            console.error('Erro ao liberar acesso ao usuário:', accessError);
-          } else {
-            console.log('Acesso liberado para o usuário:', payload.customer.email);
-          }
-        } catch (accessErr) {
-          console.error('Erro na liberação de acesso:', accessErr);
-        }
-      }
-    } else {
-      console.log('Supabase não configurado - apenas logando o webhook');
+    // Se o pagamento foi aprovado, você pode adicionar lógica personalizada aqui
+    if (payload.status.toLowerCase() === 'approved' || 
+        payload.status.toLowerCase() === 'paid' || 
+        payload.status.toLowerCase() === 'completed') {
+      console.log('Pagamento aprovado para:', payload.customer?.email);
+      // Adicione aqui qualquer lógica personalizada para pagamentos aprovados
+      // Por exemplo: enviar email, atualizar sistema externo, etc.
     }
 
     // Aqui você pode adicionar outras lógicas, como:
