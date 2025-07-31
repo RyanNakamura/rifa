@@ -3,6 +3,8 @@ import { gerarPix, verificarStatusPagamento } from './services/pixService';
 import { PixResponse } from './types';
 import { validateCpf, formatCpf, cleanCpf } from './services/cpfValidationService';
 import PaymentSuccessScreen from './components/PaymentSuccessScreen';
+import OrderBumpModal from './components/OrderBumpModal';
+import PaymentScreen from './components/PaymentScreen';
 import { 
   Gift, 
   Clock, 
@@ -53,6 +55,9 @@ function App() {
   const [cpfValidationMessage, setCpfValidationMessage] = useState('');
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [successScreenData, setSuccessScreenData] = useState(null);
+  const [showOrderBump, setShowOrderBump] = useState(false);
+  const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+  const [isProcessingOrderBump, setIsProcessingOrderBump] = useState(false);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
@@ -407,14 +412,29 @@ function App() {
       return;
     }
     
+    // Mostrar order bump após validações
+    setShowOrderBump(true);
+  };
+
+  const handleOrderBumpAccept = async () => {
+    setIsProcessingOrderBump(true);
+    await generatePixPayment(selectedPackage.numbers + 20, (selectedPackage.price + 9.99) * 100); // +20 números por R$9,99 adicional
+    setIsProcessingOrderBump(false);
+  };
+
+  const handleOrderBumpDecline = async () => {
+    setShowOrderBump(false);
+    await generatePixPayment(selectedPackage.numbers, selectedPackage.price * 100);
+  };
+
+  const generatePixPayment = async (totalNumbers: number, totalAmountCentavos: number) => {
     setIsGeneratingPix(true);
     
     try {
       const userData = cpfValidation.userData;
       const cpfLimpo = purchaseData.cpf.replace(/\D/g, '');
       const telefoneLimpo = purchaseData.telefone.replace(/\D/g, '');
-      const amountCentavos = selectedPackage.price * 100; // Converter para centavos
-      const itemName = `${selectedPackage.numbers} números da Super Rifa`;
+      const itemName = `${totalNumbers} números da Super Rifa`;
       
       // Gerar email baseado no nome se não tiver
       const email = userData?.email || `${userData?.nome?.toLowerCase().replace(/\s+/g, '')}@email.com` || 'cliente@superrifa.com';
@@ -426,16 +446,13 @@ function App() {
         email,
         cleanCpfValue,
         telefoneLimpo,
-        amountCentavos,
+        totalAmountCentavos,
         itemName,
         utmParams
       );
       
       setPixData(pixResponse);
-      setShowPixModal(true);
-      
-      // Start polling for payment status
-      startPaymentStatusPolling(pixResponse.id);
+      setShowPaymentScreen(true);
       
     } catch (error) {
       console.error('Erro ao gerar PIX:', error);
@@ -443,6 +460,11 @@ function App() {
     } finally {
       setIsGeneratingPix(false);
     }
+  };
+
+  const handlePaymentConfirmed = () => {
+    setShowPaymentScreen(false);
+    setShowSuccessScreen(true);
   };
 
   const copyPixCode = () => {
@@ -515,9 +537,21 @@ function App() {
   if (showSuccessScreen && successScreenData) {
     return (
       <PaymentSuccessScreen 
-        purchasedNumbers={successScreenData.purchasedNumbers}
+        purchasedNumbers={showOrderBump ? selectedPackage.numbers + 20 : selectedPackage.numbers}
         customerData={successScreenData.customerData}
         utmParams={successScreenData.utmParams}
+      />
+    );
+  }
+
+  if (showPaymentScreen && pixData) {
+    return (
+      <PaymentScreen
+        pixData={pixData}
+        onPaymentConfirmed={handlePaymentConfirmed}
+        purchasedNumbers={showOrderBump ? selectedPackage.numbers + 20 : selectedPackage.numbers}
+        totalAmount={showOrderBump ? (selectedPackage.price + 9.99) * 100 : selectedPackage.price * 100}
+        customerName={userData?.nome || 'Cliente'}
       />
     );
   }
@@ -1433,6 +1467,15 @@ function App() {
           </button>
         </div>
       </div>
+
+      {/* Order Bump Modal */}
+      <OrderBumpModal
+        isOpen={showOrderBump}
+        onClose={() => setShowOrderBump(false)}
+        onAccept={handleOrderBumpAccept}
+        onDecline={handleOrderBumpDecline}
+        isLoading={isProcessingOrderBump}
+      />
     </div>
   );
 }
