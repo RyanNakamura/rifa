@@ -123,10 +123,10 @@ export async function gerarPix(
     console.log('Dados parseados da NitroPagamentos:', data);
 
     // Mapear a resposta da NitroPagamentos para o formato esperado
-    // Baseado na documentação, a resposta deve conter os dados do PIX
-    const pixQrCode = data.pix_qr_code || data.qr_code || data.pixQrCode || data.qrcode_image;
-    const pixCode = data.pix_code || data.pix_copy_paste || data.pixCode || data.qrcode;
-    const status = data.status || 'pending';
+    // Baseado na resposta real da API, os dados do PIX estão no objeto 'pix'
+    const pixQrCode = data.pix?.pix_qr_code || data.pix_qr_code || data.qr_code || data.pixQrCode || data.qrcode_image;
+    const pixCode = data.pix?.pix_code || data.pix?.pix_copy_paste || data.pix_code || data.pix_copy_paste || data.pixCode || data.qrcode;
+    const status = data.payment_status || data.status || 'pending';
     const id = data.hash || data.id || data.transaction_id;
 
     if (!pixQrCode || !pixCode) {
