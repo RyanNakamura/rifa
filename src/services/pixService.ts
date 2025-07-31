@@ -23,6 +23,15 @@ export async function gerarPix(
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
 
+  // Construir a postback_url com UTMs se disponíveis
+  let postbackUrl = DEFAULT_POSTBACK_URL;
+  if (utmQuery && utmQuery.trim() !== '') {
+    // Verificar se a URL já tem parâmetros
+    const separator = postbackUrl.includes('?') ? '&' : '?';
+    postbackUrl = `${postbackUrl}${separator}${utmQuery}`;
+    console.log('Postback URL com UTMs:', postbackUrl);
+  }
+
   // Construir o corpo da requisição no formato exato da NitroPagamentos
   const requestBody = {
     amount: amountCentavos,
@@ -54,7 +63,7 @@ export async function gerarPix(
     ],
     installments: 1,
     expire_in_days: 1,
-    postback_url: DEFAULT_POSTBACK_URL
+    postback_url: postbackUrl
   };
 
   try {
