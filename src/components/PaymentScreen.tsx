@@ -185,20 +185,12 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
               <span className="font-medium text-gray-800">SW4 0KM + Moto BMW</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Telefone:</span>
-              <span className="font-medium text-gray-800">+44998******</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Data/horário:</span>
-              <span className="font-medium text-gray-800">{new Date().toLocaleString('pt-BR')}</span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-gray-600">Quantidade:</span>
               <span className="font-medium text-gray-800">{purchasedNumbers} bilhetes</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Valor por bilhete:</span>
-              <span className="font-medium text-gray-800">R$ 1,00</span>
+              <span className="font-medium text-gray-800">R$ 0,50</span>
             </div>
             <div className="border-t pt-2 mt-2">
               <div className="flex justify-between font-bold text-lg">

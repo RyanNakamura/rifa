@@ -83,6 +83,14 @@ const OrderBumpModal: React.FC<OrderBumpModalProps> = ({
           <button
             onClick={onDecline}
             disabled={isLoading}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            CONTINUAR SEM ADICIONAL
+          </button>
+          
+          <button
+            onClick={onDecline}
+            disabled={isLoading}
             className="w-full text-white/80 hover:text-white text-sm py-2 transition-colors duration-200 disabled:opacity-50"
           >
             Não, obrigado. Continuar sem bilhetes extras.
