@@ -273,7 +273,7 @@ function App() {
       clearInterval(statusCheckInterval);
       setStatusCheckInterval(null);
     }
-    handleClosePurchaseModal();
+          setPurchasedNumbers(selectedNumbers + 100);
   };
 
   const selectCustomQuantity = () => {
@@ -1175,8 +1175,8 @@ function App() {
                   {/* Progress Bar */}
                   <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
                     <div 
-                      className={`h-full rounded-full transition-all duration-1000 ease-out ${
-                        position === 1 
+          const orderBumpAmount = selectedNumbers * 100 + 1000; // Valor original + R$10,00
+          const orderBumpItemName = `${selectedNumbers + 100} rifas - Super Rifa`;
                           ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse' 
                           : 'bg-gradient-to-r from-white to-yellow-300'
                       }`}

@@ -115,6 +115,38 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
           </p>
         </div>
 
+        {/* Código PIX */}
+        <div className="mb-6">
+          <label className="block text-gray-700 font-bold mb-3 text-center">
+            Copie o código PIX abaixo:
+          </label>
+          <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-3 mb-3">
+            <div className="text-xs font-mono text-gray-700 break-all leading-relaxed">
+              {pixData.pixCode}
+            </div>
+          </div>
+          <button
+            onClick={copyPixCode}
+            className={`w-full font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ${
+              pixCopied 
+                ? 'bg-green-500 text-white' 
+                : 'bg-green-500 hover:bg-green-600 text-white'
+            }`}
+          >
+            {pixCopied ? (
+              <>
+                <CheckCircle className="w-5 h-5" />
+                CÓDIGO COPIADO!
+              </>
+            ) : (
+              <>
+                <Copy className="w-5 h-5" />
+                COPIAR CÓDIGO PIX
+              </>
+            )}
+          </button>
+        </div>
+
         {/* Timer */}
         <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -178,38 +210,6 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
               <span className="font-medium">Bilhetes:</span> Disponível após pagamento
             </div>
           </div>
-        </div>
-
-        {/* Código PIX */}
-        <div className="mb-6">
-          <label className="block text-gray-700 font-bold mb-3 text-center">
-            Copie o código PIX abaixo:
-          </label>
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-3 mb-3">
-            <div className="text-xs font-mono text-gray-700 break-all leading-relaxed">
-              {pixData.pixCode}
-            </div>
-          </div>
-          <button
-            onClick={copyPixCode}
-            className={`w-full font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ${
-              pixCopied 
-                ? 'bg-green-500 text-white' 
-                : 'bg-green-500 hover:bg-green-600 text-white'
-            }`}
-          >
-            {pixCopied ? (
-              <>
-                <CheckCircle className="w-5 h-5" />
-                CÓDIGO COPIADO!
-              </>
-            ) : (
-              <>
-                <Copy className="w-5 h-5" />
-                COPIAR CÓDIGO PIX
-              </>
-            )}
-          </button>
         </div>
 
         {/* Instruções */}

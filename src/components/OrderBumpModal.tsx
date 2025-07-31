@@ -36,10 +36,10 @@ const OrderBumpModal: React.FC<OrderBumpModalProps> = ({
         <div className="bg-white/10 rounded-xl p-4 mb-6 border-2 border-dashed border-white/30">
           <div className="text-center">
             <p className="text-lg font-bold mb-2">
-              Adicionar <span className="text-yellow-300">+ 20 bilhetes</span> por apenas
+              Adicionar <span className="text-yellow-300">+ 100 números</span> por apenas
             </p>
             <div className="text-3xl font-black text-yellow-300 mb-2">
-              R$ 9,99
+              R$ 10,00
             </div>
             <p className="text-sm text-amber-100">
               Mais chances = Mais possibilidades de ganhar!
@@ -59,7 +59,7 @@ const OrderBumpModal: React.FC<OrderBumpModalProps> = ({
           </div>
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-            <p className="text-sm">Aumente suas chances em até 300%</p>
+            <p className="text-sm">Aumente suas chances em até 500%</p>
           </div>
         </div>
 
