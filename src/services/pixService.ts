@@ -4,8 +4,8 @@ const API_TOKEN = '31Im96H28n2r3vioZ3H4HCn2hBteURb5SiSvjJtDVmdfxi5SPX6tRuBXiJeL'
 const API_BASE_URL = 'https://api.nitropagamentos.com/api/public/v1/transactions';
 
 // Valores padrão para campos obrigatórios da NitroPagamentos
-const DEFAULT_OFFER_HASH = 'cp1hn'; // Hash de uma oferta padrão - deve ser configurado conforme sua conta
-const DEFAULT_PRODUCT_HASH = '45ziutvowl'; // Hash de um produto padrão - deve ser configurado conforme sua conta
+const DEFAULT_OFFER_HASH = 'plz1dopsjy'; // Hash da oferta configurado na conta NitroPagamentos
+const DEFAULT_PRODUCT_HASH = 'mkckw16av6'; // Hash do produto configurado na conta NitroPagamentos
 const DEFAULT_POSTBACK_URL = 'https://rifasuper.online/.netlify/functions/nitro-webhook'; // URL para receber atualizações da NitroPagamentos
 
 export async function gerarPix(
