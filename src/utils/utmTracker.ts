@@ -1,5 +1,24 @@
 // Utilitário para capturar dados de UTM do sessionStorage
 export function getUtmParamsFromSession(): string {
+  // Primeiro, tentar capturar UTMs da URL atual
+  const urlParams = new URLSearchParams(window.location.search);
+  const utmFromUrl = [];
+  
+  // Capturar UTMs da URL atual
+  const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'click_id'];
+  utmParams.forEach(param => {
+    const value = urlParams.get(param);
+    if (value) {
+      utmFromUrl.push(`${param}=${encodeURIComponent(value)}`);
+    }
+  });
+  
+  if (utmFromUrl.length > 0) {
+    console.log('UTMs capturados da URL atual:', utmFromUrl.join('&'));
+    return utmFromUrl.join('&');
+  }
+  
+  // Se não encontrou na URL, tentar no sessionStorage
   const sessionDataRaw = sessionStorage.getItem('PREVIOUS_PAGE_VIEW');
   let utmQuery = '';
 
@@ -35,4 +54,27 @@ export function getUtmParamsFromSession(): string {
   }
 
   return utmQuery;
+}
+
+// Nova função para capturar UTMs diretamente da URL
+export function getUtmParamsFromUrl(): string {
+  const urlParams = new URLSearchParams(window.location.search);
+  const utmParams = [];
+  
+  // Lista de parâmetros UTM e outros parâmetros de tracking
+  const trackingParams = [
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+    'click_id', 'fbclid', 'gclid', 'ttclid'
+  ];
+  
+  trackingParams.forEach(param => {
+    const value = urlParams.get(param);
+    if (value) {
+      utmParams.push(`${param}=${encodeURIComponent(value)}`);
+    }
+  });
+  
+  const result = utmParams.join('&');
+  console.log('UTMs capturados da URL:', result);
+  return result;
 }
