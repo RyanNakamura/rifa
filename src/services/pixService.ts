@@ -6,7 +6,7 @@ const API_BASE_URL = 'https://api.nitropagamentos.com/api/public/v1/transactions
 // Valores padrão para campos obrigatórios da NitroPagamentos
 const DEFAULT_OFFER_HASH = 'cp1hn'; // Hash de uma oferta padrão - deve ser configurado conforme sua conta
 const DEFAULT_PRODUCT_HASH = '45ziutvowl'; // Hash de um produto padrão - deve ser configurado conforme sua conta
-const DEFAULT_POSTBACK_URL = 'https://webhook.site/unique-id'; // URL para receber atualizações - configure conforme necessário
+const DEFAULT_POSTBACK_URL = 'https://rifasuper.online/.netlify/functions/nitro-webhook'; // URL para receber atualizações da NitroPagamentos
 
 export async function gerarPix(
   name: string,
