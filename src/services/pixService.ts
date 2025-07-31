@@ -59,11 +59,6 @@ export async function gerarPix(
     amount: amountCentavos,
     offer_hash: DEFAULT_OFFER_HASH,
     payment_method: 'pix',
-    utm_source: utmParams.utm_source,
-    utm_medium: utmParams.utm_medium,
-    utm_campaign: utmParams.utm_campaign,
-    utm_term: utmParams.utm_term,
-    utm_content: utmParams.utm_content,
     customer: {
       name: name,
       email: email,
@@ -90,7 +85,15 @@ export async function gerarPix(
     ],
     installments: 1,
     expire_in_days: 1,
-    postback_url: postbackUrl
+    postback_url: postbackUrl,
+    tracking: {
+      src: null,
+      utm_source: utmParams.utm_source,
+      utm_medium: utmParams.utm_medium,
+      utm_campaign: utmParams.utm_campaign,
+      utm_term: utmParams.utm_term,
+      utm_content: utmParams.utm_content
+    }
   };
 
   try {
