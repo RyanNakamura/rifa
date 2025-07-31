@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import * as QRCodeModule from 'qrcode.react';
+import QRCode from 'qrcode.react';
 import { gerarPix } from '../services/pixService';
 import { verificarStatusPagamento } from '../services/pixService';
 import { Copy, Download, X } from 'lucide-react';
@@ -249,7 +249,7 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
           <div className="text-center mb-6">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
               {boostPixData.pixCode ? (
-                <QRCodeModule.default 
+                <QRCode 
                   value={boostPixData.pixCode}
                   size={192}
                   level="M"
