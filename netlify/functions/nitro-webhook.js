@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
     console.log('Parâmetros UTM recebidos:', JSON.stringify(utmParams, null, 2));
 
     // Validar se o payload contém os campos necessários
-    if (!payload.hash || !payload.status) {
+    if (!payload.hash || !payload.payment_status) {
       console.error('Payload inválido - faltam campos obrigatórios:', payload);
       return {
         statusCode: 400,
@@ -55,15 +55,15 @@ exports.handler = async (event, context) => {
     // Processar webhook da NitroPagamentos
     console.log('Processando webhook da NitroPagamentos:', {
       transaction_id: payload.hash,
-      status: payload.status,
+      status: payload.payment_status,
       customer: payload.customer,
       utm_params: utmParams
     });
 
     // Se o pagamento foi aprovado, você pode adicionar lógica personalizada aqui
-    if (payload.status.toLowerCase() === 'approved' || 
-        payload.status.toLowerCase() === 'paid' || 
-        payload.status.toLowerCase() === 'completed') {
+    if (payload.payment_status.toLowerCase() === 'approved' || 
+        payload.payment_status.toLowerCase() === 'paid' || 
+        payload.payment_status.toLowerCase() === 'completed') {
       console.log('Pagamento aprovado para:', payload.customer?.email);
       // Adicione aqui qualquer lógica personalizada para pagamentos aprovados
       // Por exemplo: enviar email, atualizar sistema externo, etc.
@@ -86,7 +86,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ 
         message: 'Webhook processado com sucesso',
         transaction_id: payload.hash,
-        status: payload.status,
+        status: payload.payment_status,
         utm_params: utmParams
       }),
     };
