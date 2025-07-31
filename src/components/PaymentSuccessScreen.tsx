@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import QRCode from 'qrcode.react';
+import { QRCode } from 'qrcode.react';
 import { gerarPix } from '../services/pixService';
 import { verificarStatusPagamento } from '../services/pixService';
 import { Copy, Download, X } from 'lucide-react';
