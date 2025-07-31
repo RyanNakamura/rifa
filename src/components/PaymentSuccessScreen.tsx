@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
+import QRCode from 'qrcode.react';
 import { gerarPix } from '../services/pixService';
 import { verificarStatusPagamento } from '../services/pixService';
 import { Copy, Download, X } from 'lucide-react';
@@ -247,15 +248,12 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
           {/* QR Code */}
           <div className="text-center mb-6">
             <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
-              {boostPixData.pixQrCode ? (
-                <img 
-                  src={boostPixData.pixQrCode} 
-                  alt="QR Code PIX Boost" 
-                  className="w-48 h-48 mx-auto"
-                  onError={(e) => {
-                    console.error('Erro ao carregar QR Code:', boostPixData.pixQrCode);
-                    e.currentTarget.style.display = 'none';
-                  }}
+              {boostPixData.pixCode ? (
+                <QRCode 
+                  value={boostPixData.pixCode}
+                  size={192}
+                  level="M"
+                  includeMargin={true}
                 />
               ) : (
                 <div className="w-48 h-48 mx-auto flex items-center justify-center bg-gray-100 text-gray-500">
@@ -291,14 +289,6 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
 
           {/* Botões de Ação */}
           <div className="space-y-3">
-            <button
-              onClick={downloadBoostQRCode}
-              className="w-full bg-blue-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              BAIXAR QR CODE
-            </button>
-            
             <button
               onClick={copyBoostPixCode}
               className="w-full bg-green-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"

@@ -124,24 +124,18 @@ export async function gerarPix(
 
     // Mapear a resposta da NitroPagamentos para o formato esperado
     // Baseado na resposta real da API, os dados do PIX estão no objeto 'pix'
-    const pixQrCode = data.pix?.pix_qr_code || data.pix_qr_code || data.qr_code || data.pixQrCode || data.qrcode_image;
-    const pixCode = data.pix?.pix_code || data.pix?.pix_copy_paste || data.pix?.pix_qr_code;
-    const status = data.payment_status || data.status || 'pending';
+    // O pix_qr_code da NitroPagamentos é o código PIX (string), não uma imagem
+    const pixCode = data.pix?.pix_qr_code || data.pix?.pix_code || data.pix?.pix_copy_paste;
+    const status = data.payment_status || 'pending';
     const id = data.hash || data.id || data.transaction_id;
 
     // Debug dos campos encontrados
     console.log('Campos extraídos:', {
-      pixQrCode,
       pixCode,
       status,
       id,
       pixObject: data.pix
     });
-
-    if (!pixQrCode) {
-      console.error('QR Code não encontrado. Dados do PIX:', data.pix);
-      throw new Error('QR Code do PIX não encontrado na resposta do servidor.');
-    }
 
     if (!pixCode) {
       console.error('Código PIX não encontrado. Dados do PIX:', data.pix);
@@ -154,7 +148,7 @@ export async function gerarPix(
     }
 
     return {
-      pixQrCode: pixQrCode,
+      pixQrCode: pixCode, // Usar o código PIX para gerar QR Code no frontend
       pixCode: pixCode,
       status: status,
       id: id
@@ -223,7 +217,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
     }
 
     // Mapear os status da NitroPagamentos para nossos status internos
-    const status = data.status || 'pending';
+    const status = data.payment_status || 'pending';
     console.log('Status do pagamento na NitroPagamentos:', status);
     
     // Mapear possíveis status da API NitroPagamentos para nossos status internos
