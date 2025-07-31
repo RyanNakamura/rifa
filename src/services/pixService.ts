@@ -23,7 +23,7 @@ export async function gerarPix(
     throw new Error('Sem conexão com a internet. Por favor, verifique sua conexão e tente novamente.');
   }
 
-  // Construir o corpo da requisição no formato da NitroPagamentos
+  // Construir o corpo da requisição no formato exato da NitroPagamentos
   const requestBody = {
     amount: amountCentavos,
     offer_hash: DEFAULT_OFFER_HASH,
@@ -33,8 +33,6 @@ export async function gerarPix(
       email: email,
       phone_number: phone,
       document: cpf,
-      // Campos de endereço obrigatórios - usando valores padrão
-      // Em produção, estes deveriam ser coletados do usuário
       street_name: 'Rua Principal',
       number: 'S/N',
       complement: '',
@@ -54,15 +52,10 @@ export async function gerarPix(
         tangible: false
       }
     ],
-    installments: 1, // Para PIX sempre será 1
+    installments: 1,
     expire_in_days: 1,
     postback_url: DEFAULT_POSTBACK_URL
   };
-
-  // Adicionar UTM query se fornecida (como metadado personalizado)
-  if (utmQuery) {
-    (requestBody as any).utm_data = utmQuery;
-  }
 
   try {
     console.log('Enviando requisição PIX para NitroPagamentos:', {
@@ -85,24 +78,37 @@ export async function gerarPix(
     console.log('Resposta completa NitroPagamentos:', responseText);
 
     if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Endpoint não encontrado na API NitroPagamentos. Por favor, tente novamente mais tarde.');
-      } else if (response.status === 403) {
-        throw new Error('Acesso negado. Verifique se o token da NitroPagamentos está correto.');
-      } else if (response.status === 422) {
-        throw new Error('Dados inválidos enviados para a NitroPagamentos. Verifique os dados do pagamento.');
-      } else if (response.status === 500) {
-        throw new Error('Erro no processamento do pagamento. Por favor, aguarde alguns minutos e tente novamente. Se o problema persistir, entre em contato com o suporte.');
-      } else if (response.status === 0) {
-        throw new Error('Não foi possível conectar ao servidor. Verifique se o servidor está online.');
-      } else {
-        let errorData;
-        try {
-          errorData = JSON.parse(responseText);
-        } catch (e) {
-          errorData = { message: 'Erro desconhecido' };
+      let errorMessage = 'Erro desconhecido';
+      
+      try {
+        const errorData = JSON.parse(responseText);
+        console.error('Erro detalhado da NitroPagamentos:', errorData);
+        
+        // Tratar diferentes tipos de erro da API
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors) {
+          // Se há erros de validação, mostrar o primeiro erro
+          const firstError = Object.values(errorData.errors)[0];
+          if (Array.isArray(firstError) && firstError.length > 0) {
+            errorMessage = firstError[0];
+          }
         }
-        throw new Error(`Erro no servidor: ${errorData.message || 'Erro desconhecido'}`);
+      } catch (e) {
+        console.error('Erro ao parsear resposta de erro:', e);
+        errorMessage = `Erro HTTP ${response.status}: ${responseText}`;
+      }
+
+      if (response.status === 404) {
+        throw new Error('Endpoint não encontrado na API NitroPagamentos. Verifique a configuração.');
+      } else if (response.status === 401 || response.status === 403) {
+        throw new Error('Token de API inválido ou sem permissão. Verifique as credenciais.');
+      } else if (response.status === 422) {
+        throw new Error(`Dados inválidos: ${errorMessage}`);
+      } else if (response.status === 500) {
+        throw new Error('Erro interno do servidor NitroPagamentos. Tente novamente em alguns minutos.');
+      } else {
+        throw new Error(`Erro na API: ${errorMessage}`);
       }
     }
 
@@ -110,21 +116,27 @@ export async function gerarPix(
     try {
       data = JSON.parse(responseText);
     } catch (e) {
-      throw new Error('Erro ao processar resposta do servidor. Por favor, tente novamente.');
+      console.error('Erro ao parsear resposta JSON:', e);
+      throw new Error('Resposta inválida do servidor. Tente novamente.');
     }
 
     console.log('Dados parseados da NitroPagamentos:', data);
 
     // Mapear a resposta da NitroPagamentos para o formato esperado
-    // A estrutura exata da resposta pode variar, ajuste conforme necessário
-    const pixQrCode = data.pix_qr_code || data.qr_code || data.pixQrCode;
-    const pixCode = data.pix_code || data.pix_copy_paste || data.pixCode;
+    // Baseado na documentação, a resposta deve conter os dados do PIX
+    const pixQrCode = data.pix_qr_code || data.qr_code || data.pixQrCode || data.qrcode_image;
+    const pixCode = data.pix_code || data.pix_copy_paste || data.pixCode || data.qrcode;
     const status = data.status || 'pending';
     const id = data.hash || data.id || data.transaction_id;
 
-    if (!pixQrCode || !pixCode || !id) {
-      console.error('Resposta incompleta da NitroPagamentos:', data);
-      throw new Error('Resposta incompleta do servidor. Por favor, tente novamente.');
+    if (!pixQrCode || !pixCode) {
+      console.error('Resposta incompleta da NitroPagamentos - faltam dados do PIX:', data);
+      throw new Error('Resposta incompleta do servidor - dados do PIX não encontrados.');
+    }
+
+    if (!id) {
+      console.error('Resposta incompleta da NitroPagamentos - falta ID da transação:', data);
+      throw new Error('Resposta incompleta do servidor - ID da transação não encontrado.');
     }
 
     return {
@@ -135,10 +147,17 @@ export async function gerarPix(
     };
   } catch (error) {
     console.error('Erro ao gerar PIX na NitroPagamentos:', error);
+    
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      throw new Error('Servidor NitroPagamentos indisponível. Por favor, tente novamente em alguns minutos.');
+      throw new Error('Não foi possível conectar com o servidor de pagamentos. Verifique sua conexão e tente novamente.');
     }
-    throw error;
+    
+    // Re-throw the error if it's already a custom error message
+    if (error.message && !error.message.includes('Failed to fetch')) {
+      throw error;
+    }
+    
+    throw new Error('Erro inesperado ao processar pagamento. Tente novamente.');
   }
 }
 
@@ -169,7 +188,7 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
       if (response.status === 404) {
         console.log('Pagamento não encontrado na NitroPagamentos, retornando PENDING');
         return 'PENDING';
-      } else if (response.status === 403) {
+      } else if (response.status === 403 || response.status === 401) {
         console.error('Acesso negado ao verificar status na NitroPagamentos');
         return 'PENDING';
       } else {
@@ -194,7 +213,6 @@ export async function verificarStatusPagamento(paymentId: string): Promise<strin
     console.log('Status do pagamento na NitroPagamentos:', status);
     
     // Mapear possíveis status da API NitroPagamentos para nossos status internos
-    // Ajuste conforme a documentação específica dos status da NitroPagamentos
     switch (status.toLowerCase()) {
       case 'approved':
       case 'paid':
