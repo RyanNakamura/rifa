@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { gerarPix } from '../services/pixService';
+import { verificarStatusPagamento } from '../services/pixService';
 import { Copy, Download, X } from 'lucide-react';
+import { PixResponse } from '../types';
 
 interface PaymentSuccessScreenProps {
   purchasedNumbers?: number;
@@ -11,18 +14,57 @@ interface PaymentSuccessScreenProps {
     phone: string;
   };
   utmParams?: string;
+  initialPixData?: PixResponse;
 }
 
 const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({ 
   purchasedNumbers = 20, 
   customerData,
-  utmParams = ''
+  utmParams = '',
+  initialPixData
 }) => {
   const [showBoostOffer, setShowBoostOffer] = useState(true);
   const [isGeneratingBoostPix, setIsGeneratingBoostPix] = useState(false);
   const [boostPixData, setBoostPixData] = useState(null);
   const [showBoostPixModal, setShowBoostPixModal] = useState(false);
+  const [currentPaymentStatus, setCurrentPaymentStatus] = useState(initialPixData?.status || 'PENDING');
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
 
+  // Polling para verificar status do pagamento
+  useEffect(() => {
+    if (!initialPixData?.id || currentPaymentStatus === 'APPROVED' || currentPaymentStatus === 'CANCELLED' || currentPaymentStatus === 'EXPIRED') {
+      return;
+    }
+
+    setIsCheckingPayment(true);
+    
+    const checkPaymentStatus = async () => {
+      try {
+        const status = await verificarStatusPagamento(initialPixData.id);
+        console.log('Status do pagamento verificado:', status);
+        setCurrentPaymentStatus(status);
+        
+        // Se o pagamento foi aprovado, cancelado ou expirou, para o polling
+        if (status === 'APPROVED' || status === 'CANCELLED' || status === 'EXPIRED') {
+          setIsCheckingPayment(false);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar status do pagamento:', error);
+      }
+    };
+
+    // Verificar imediatamente
+    checkPaymentStatus();
+
+    // Configurar polling a cada 5 segundos
+    const interval = setInterval(checkPaymentStatus, 5000);
+
+    // Cleanup do interval quando o componente for desmontado ou quando o pagamento for finalizado
+    return () => {
+      clearInterval(interval);
+      setIsCheckingPayment(false);
+    };
+  }, [initialPixData?.id, currentPaymentStatus]);
   // Gerar números aleatórios únicos para as rifas
   const generateRandomNumbers = (count: number) => {
     const numbers = new Set<number>();
@@ -88,6 +130,87 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
     setShowBoostPixModal(false);
     setBoostPixData(null);
   };
+
+  // Se o pagamento foi aprovado, mostrar tela de sucesso final
+  if (currentPaymentStatus === 'APPROVED') {
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 pb-24">
+        <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-auto shadow-2xl max-h-full overflow-y-auto">
+          <div className="text-center space-y-4">
+            <div className="text-6xl mb-4">🎉</div>
+            
+            <h1 className="text-2xl font-bold text-green-800 mb-4">
+              PAGAMENTO CONFIRMADO!
+            </h1>
+            
+            <div className="bg-green-50 rounded-lg p-4 mb-4">
+              <p className="text-lg font-semibold text-green-800 mb-3">
+                Seus {purchasedNumbers} números da sorte:
+              </p>
+              
+              <div className="grid grid-cols-5 gap-2 max-h-32 overflow-y-auto">
+                {rifaNumbers.map((number, index) => (
+                  <div
+                    key={index}
+                    className="bg-green-500 text-white text-sm font-bold py-2 px-2 rounded text-center animate-pulse"
+                  >
+                    {number.toString().padStart(5, '0')}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <h4 className="font-bold text-yellow-800 mb-2">🍀 Boa Sorte!</h4>
+              <p className="text-sm text-yellow-700">
+                Seus números foram confirmados e você está participando do sorteio!
+              </p>
+            </div>
+            
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl text-lg transition-colors duration-200"
+            >
+              PARTICIPAR DE NOVO
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Se o pagamento foi cancelado ou expirou
+  if (currentPaymentStatus === 'CANCELLED' || currentPaymentStatus === 'EXPIRED') {
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 pb-24">
+        <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-auto shadow-2xl max-h-full overflow-y-auto">
+          <div className="text-center space-y-4">
+            <div className="text-6xl mb-4">😔</div>
+            
+            <h1 className="text-2xl font-bold text-red-800 mb-4">
+              {currentPaymentStatus === 'CANCELLED' ? 'PAGAMENTO CANCELADO' : 'PAGAMENTO EXPIRADO'}
+            </h1>
+            
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">
+                {currentPaymentStatus === 'CANCELLED' 
+                  ? 'O pagamento foi cancelado. Você pode tentar novamente.'
+                  : 'O tempo para pagamento expirou. Você pode gerar um novo PIX.'
+                }
+              </p>
+            </div>
+            
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl text-lg transition-colors duration-200"
+            >
+              TENTAR NOVAMENTE
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showBoostPixModal && boostPixData) {
     return (
@@ -197,20 +320,41 @@ const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({
           <>
             {/* Números das Rifas */}
             <div className="text-center mb-4">
-              <h2 className="text-lg font-bold text-gray-800 mb-3">
-                🎉 Seus Números da Sorte! 🎉
+              <h2 className="text-lg font-bold text-gray-800 mb-2">
+                {currentPaymentStatus === 'PENDING' ? '⏳ Aguardando Pagamento...' : '🎉 Seus Números da Sorte! 🎉'}
               </h2>
+              
+              {/* Status do Pagamento */}
+              {currentPaymentStatus === 'PENDING' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-center justify-center gap-2">
+                    {isCheckingPayment && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    )}
+                    <p className="text-sm text-blue-700 font-medium">
+                      Verificando status do pagamento...
+                    </p>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Assim que o PIX for pago, seus números serão confirmados automaticamente!
+                  </p>
+                </div>
+              )}
               
               <div className="bg-green-50 rounded-lg p-3 mb-4">
                 <p className="text-sm font-semibold text-green-800 mb-2">
-                  Você comprou {purchasedNumbers} rifas:
+                  {currentPaymentStatus === 'PENDING' ? 'Seus números reservados:' : `Você comprou ${purchasedNumbers} rifas:`}
                 </p>
                 
                 <div className="grid grid-cols-5 gap-1 max-h-32 overflow-y-auto">
                   {rifaNumbers.map((number, index) => (
                     <div
                       key={index}
-                      className="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded text-center"
+                      className={`text-white text-xs font-bold py-1 px-2 rounded text-center ${
+                        currentPaymentStatus === 'PENDING' 
+                          ? 'bg-gray-400' 
+                          : 'bg-green-500'
+                      }`}
                     >
                       {number.toString().padStart(5, '0')}
                     </div>
