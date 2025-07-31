@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { gerarPix, verificarStatusPagamento } from './services/pixService';
 import { PixResponse } from './types';
 import { validateCpf, formatCpf, cleanCpf } from './services/cpfValidationService';
-import { useState } from 'react';
 import PaymentSuccessScreen from './components/PaymentSuccessScreen';
 import OrderBumpModal from './components/OrderBumpModal';
 import PaymentScreen from './components/PaymentScreen';
