@@ -325,8 +325,8 @@ function App() {
       return;
     }
 
-    setCpfValidation(prev => ({ ...prev, isLoading: true, error: '' }));
-
+    if (quantity < 10) {
+      alert('Quantidade mínima é de 10 rifas.');
     try {
       const token = '95150b0b9cc3dcb0ae0b24a66514a8360cb293324fb65ffb76f783133018cfc8';
       const response = await fetch(`https://api.dataget.site/api/v1/cpf/${cpfLimpo}`, {
@@ -635,7 +635,7 @@ function App() {
           <div className="flex gap-2">
             <input
               type="number"
-              min="40"
+              min="10"
               value={customQuantity}
               onChange={(e) => setCustomQuantity(e.target.value)}
               placeholder="Digite a quantidade"
