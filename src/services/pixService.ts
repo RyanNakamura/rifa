@@ -125,13 +125,18 @@ export async function gerarPix(
     // Mapear a resposta da NitroPagamentos para o formato esperado
     // Baseado na resposta real da API, os dados do PIX estão no objeto 'pix'
     const pixQrCode = data.pix?.pix_qr_code || data.pix_qr_code || data.qr_code || data.pixQrCode || data.qrcode_image;
-    const pixCode = data.pix?.pix_code || data.pix?.pix_copy_paste || data.pix_code || data.pix_copy_paste || data.pixCode || data.qrcode;
+    const pixCode = data.pix?.pix_code || data.pix?.pix_copy_paste || data.pix?.pix_qr_code;
     const status = data.payment_status || data.status || 'pending';
     const id = data.hash || data.id || data.transaction_id;
 
-    if (!pixQrCode || !pixCode) {
+    if (!pixQrCode) {
       console.error('Resposta incompleta da NitroPagamentos - faltam dados do PIX:', data);
-      throw new Error('Resposta incompleta do servidor - dados do PIX não encontrados.');
+      throw new Error('Resposta incompleta do servidor - QR Code do PIX não encontrado.');
+    }
+
+    if (!pixCode) {
+      console.error('Resposta incompleta da NitroPagamentos - código PIX não encontrado:', data);
+      throw new Error('Resposta incompleta do servidor - código PIX não encontrado.');
     }
 
     if (!id) {
