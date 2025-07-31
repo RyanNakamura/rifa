@@ -1182,8 +1182,7 @@ function App() {
                     className={selectedNumbers > 0 
                       ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse'
                       : 'bg-gradient-to-r from-white to-yellow-300'
-                    }
-                      }`}
+                    }`}
                       style={{ width: `${progressPercentage}%` }}
                     />
                   </div>
