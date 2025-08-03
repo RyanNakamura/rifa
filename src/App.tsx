@@ -687,7 +687,7 @@ function App() {
 
         {/* Custom Quantity Input */}
         <div className="mb-4">
-          <label className="block text-white font-bold mb-3">Quantas rifas você quer? (mínimo 10)</label>
+          <label className="block text-white font-semibold mb-2">
             Quantas rifas você quer? (mínimo 40)
           </label>
           <div className="flex gap-2">
@@ -695,13 +695,13 @@ function App() {
               type="number"
               min="40"
               value={customQuantity}
-                if (selectedNumbers >= 10) {
-                if (value >= 10) {
+              onChange={(e) => setCustomQuantity(e.target.value)}
+              placeholder="Digite a quantidade"
               className="flex-1 p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:border-yellow-400 outline-none"
-                  alert('Mínimo de 10 rifas');
+            />
             <button
               onClick={selectCustomQuantity}
-              disabled={selectedNumbers < 10 || isGeneratingPix}
+              disabled={!customQuantity || parseInt(customQuantity) < 40}
               className="bg-yellow-400 text-green-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Selecionar
@@ -738,7 +738,7 @@ function App() {
                   </span>
                 </div>
                 <div className="text-sm mb-3">
-          {[10, 50, 100, 500].map((num) => (
+                  Apenas R$0,50 por número
                 </div>
                 
                 <button 
