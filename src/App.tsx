@@ -609,7 +609,7 @@ function App() {
           
           <div className="mb-4">
             <h2 className="text-2xl font-black text-green-800 mb-2">
-              🎁 CONCORRA A UMA 🎁
+              Quantas rifas você quer? (mínimo 10)
             </h2>
             <div className="text-3xl font-black text-green-900 mb-2">
               SW4 0KM + MOTO BMW
@@ -854,22 +854,22 @@ function App() {
               >
                 ×
               </button>
-            </div>
+                min="10"
 
             {/* Pacote Selecionado */}
             {selectedPackage && (
               <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-3 mb-4">
                 <div className="text-center">
                   <div className="text-base font-bold text-green-800">
-                    {selectedPackage.numbers} números
+                disabled={quantity < 10}
                   </div>
                   <div className="text-xl font-black text-green-900">
                     R${selectedPackage.price}
                   </div>
                   <div className="text-sm text-green-700">
-                    Apenas R$0,50 por número
+            {quantity < 10 && (
                   </div>
-                </div>
+                Quantidade mínima: 10 rifas
               </div>
             )}
 
