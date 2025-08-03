@@ -694,7 +694,7 @@ function App() {
             <input
               type="number"
               min="40"
-              value={customQuantity}
+              max="10"
               onChange={(e) => setCustomQuantity(e.target.value)}
               placeholder="Digite a quantidade"
               className="flex-1 p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:border-yellow-400 outline-none"
