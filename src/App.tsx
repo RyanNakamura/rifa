@@ -868,7 +868,6 @@ function App() {
                   </div>
                   <div className="text-sm text-green-700">
             {quantity < 10 && (
-                  </div>
                 Quantidade mínima: 10 rifas
               </div>
             )}
