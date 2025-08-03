@@ -688,6 +688,8 @@ function App() {
         {/* Custom Quantity Input */}
         <div className="mb-4">
           <label className="block text-white font-bold mb-3">Quantas rifas você quer? (mínimo 10)</label>
+            Quantas rifas você quer? (mínimo 40)
+          </label>
           <div className="flex gap-2">
             <input
               type="number"
