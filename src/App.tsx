@@ -289,7 +289,7 @@ function App() {
 
   const selectCustomQuantity = () => {
     const quantity = parseInt(customQuantity);
-    if (quantity >= 40) {
+    if (quantity >= 1) {
       const customPackage = {
         price: quantity * 0.5, // R$0.50 per number
         numbers: quantity,
@@ -688,12 +688,12 @@ function App() {
         {/* Custom Quantity Input */}
         <div className="mb-4">
           <label className="block text-white font-semibold mb-2">
-            Quantas rifas você quer? (mínimo 40)
+            Quantas rifas você quer? (mínimo 1)
           </label>
           <div className="flex gap-2">
             <input
               type="number"
-              min="40"
+              min="1"
               max="10"
               onChange={(e) => setCustomQuantity(e.target.value)}
               placeholder="Digite a quantidade"
@@ -701,7 +701,7 @@ function App() {
             />
             <button
               onClick={selectCustomQuantity}
-              disabled={!customQuantity || parseInt(customQuantity) < 40}
+              disabled={!customQuantity || parseInt(customQuantity) < 1}
               className="bg-yellow-400 text-green-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Selecionar
