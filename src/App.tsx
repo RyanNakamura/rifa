@@ -1103,6 +1103,8 @@ function App() {
               </p>
               <p className="text-green-100 text-xs mt-2">
                 🍀 Boa sorte! O sorteio será transmitido ao vivo no nosso Instagram.
+              </p>
+            </div>
           </div>
         )}
         
