@@ -481,7 +481,7 @@ function App() {
 
   const handlePaymentConfirmed = () => {
     setShowPaymentScreen(false);
-    
+    setShowRoulette(true);
     // Se for o primeiro pagamento, mostrar a roleta
     if (isFirstPayment) {
       setShowRoulette(true);
