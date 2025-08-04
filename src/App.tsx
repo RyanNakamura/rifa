@@ -64,6 +64,12 @@ function App() {
   const [showRoulette, setShowRoulette] = useState(false);
   const [showTaxPayment, setShowTaxPayment] = useState(false);
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    cpf: '',
+    phone: ''
+  });
   
   // Calcular valores do order bump
   const orderBumpAmount = selectedNumbers * 100 + 1000; // Valor original + R$10,00
