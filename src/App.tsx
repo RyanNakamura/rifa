@@ -919,7 +919,9 @@ function App() {
             >
               {cpfValidationStatus === 'validating' ? 'VALIDANDO...' : isGeneratingPix ? 'GERANDO PIX...' : 'CONTINUAR COMPRA'}
             </button>
-
+          </div>
+        </div>
+      )}
 
       {showRoulette && (
         <RouletteScreen
@@ -1054,218 +1056,224 @@ function App() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 
-  const renderConsultarContent = () => (
-    <div className="mt-6">
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-        <h2 className="text-2xl font-black text-white text-center mb-6">
-          🔍 CONSULTAR NÚMEROS
-        </h2>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-white font-bold mb-2">Digite seu número:</label>
-            <input 
-              type="text" 
-              placeholder="Ex: 12345"
-              value={consultaNumero}
-              onChange={(e) => setConsultaNumero(e.target.value)}
-              className="w-full p-3 rounded-lg border-2 border-green-400 focus:border-yellow-400 outline-none text-lg font-bold text-center"
-            />
+  const renderConsultarContent = () => {
+    return (
+      <div className="mt-6">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+          <h2 className="text-2xl font-black text-white text-center mb-6">
+            🔍 CONSULTAR NÚMEROS
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-white font-bold mb-2">Digite seu número:</label>
+              <input 
+                type="text" 
+                placeholder="Ex: 12345"
+                value={consultaNumero}
+                onChange={(e) => setConsultaNumero(e.target.value)}
+                className="w-full p-3 rounded-lg border-2 border-green-400 focus:border-yellow-400 outline-none text-lg font-bold text-center"
+              />
+            </div>
+            
+            <button 
+              onClick={handleConsultar}
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-black py-3 px-6 rounded-lg hover:from-green-400 hover:to-green-500 transition-all duration-200"
+            >
+              CONSULTAR NÚMERO
+            </button>
           </div>
           
-          <button 
-            onClick={handleConsultar}
-            className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-black py-3 px-6 rounded-lg hover:from-green-400 hover:to-green-500 transition-all duration-200"
-          >
-            CONSULTAR NÚMERO
-          </button>
-        </div>
-        
-        {consultaResultado === 'participando' && (
-          <div className="mt-6 p-4 bg-green-500/20 rounded-lg border-2 border-green-400">
-            <div className="text-center">
-              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
-              <h3 className="text-white font-bold text-lg mb-2">✅ PARABÉNS!</h3>
-              <p className="text-green-100 text-sm">
-                Seu número <span className="font-bold text-yellow-300">{consultaNumero}</span> está participando do sorteio!
-              </p>
-              <p className="text-green-100 text-xs mt-2">
-                🍀 Boa sorte! O sorteio será transmitido ao vivo no nosso Instagram.
-              </p>
+          {consultaResultado === 'participando' && (
+            <div className="mt-6 p-4 bg-green-500/20 rounded-lg border-2 border-green-400">
+              <div className="text-center">
+                <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
+                <h3 className="text-white font-bold text-lg mb-2">✅ PARABÉNS!</h3>
+                <p className="text-green-100 text-sm">
+                  Seu número <span className="font-bold text-yellow-300">{consultaNumero}</span> está participando do sorteio!
+                </p>
+                <p className="text-green-100 text-xs mt-2">
+                  🍀 Boa sorte! O sorteio será transmitido ao vivo no nosso Instagram.
+                </p>
+              </div>
             </div>
+          )}
+          
+          <div className="mt-6 p-4 bg-blue-500/20 rounded-lg">
+            <p className="text-white text-sm text-center">
+              💡 Digite o número que você comprou para verificar se está participando do sorteio
+            </p>
           </div>
-        )}
-        
-        <div className="mt-6 p-4 bg-blue-500/20 rounded-lg">
-          <p className="text-white text-sm text-center">
-            💡 Digite o número que você comprou para verificar se está participando do sorteio
+        </div>
+      </div>
+    );
+  };
+
+  const renderRankingContent = () => {
+    return (
+      <div className="mt-6">
+        <div className="text-center mb-6">
+          <h3 className="text-2xl font-black text-white mb-2">
+            🔥 RANKING COMPRADORES 🔥
+          </h3>
+          <p className="text-yellow-300 text-sm font-bold animate-pulse">
+            💸 LÍDER GANHA R$10.000,00 EXTRA! 💸
           </p>
         </div>
-      </div>
-    </div>
-  );
 
-  const renderRankingContent = () => (
-    <div className="mt-6">
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-black text-white mb-2">
-          🔥 RANKING COMPRADORES 🔥
-        </h3>
-        <p className="text-yellow-300 text-sm font-bold animate-pulse">
-          💸 LÍDER GANHA R$10.000,00 EXTRA! 💸
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        {rankingData.map((participant, index) => {
-          const position = index + 1;
-          const progressPercentage = (participant.cotas / maxCotas) * 100;
-          const isTopThree = position <= 3;
-          
-          return (
-            <div
-              key={participant.id}
-              className={`relative rounded-xl p-3 shadow-xl transition-all duration-300 hover:scale-105 ${
-                isTopThree 
-                  ? `${getRankBg(position)} ring-4 ring-white/30` 
-                  : 'bg-gradient-to-r from-green-600 to-green-700'
-              }`}
-            >
-              {position === 1 && (
-                <div className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-red-800 text-xs font-black px-2 py-1 rounded-full animate-bounce">
-                  R$10K
-                </div>
-              )}
-              
-              <div className="flex items-center gap-3">
-                {/* Position */}
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  {isTopThree ? getRankIcon(position) : (
-                    <span className="text-sm font-bold text-white">{position}º</span>
-                  )}
-                </div>
+        <div className="space-y-2">
+          {rankingData.map((participant, index) => {
+            const position = index + 1;
+            const progressPercentage = (participant.cotas / maxCotas) * 100;
+            const isTopThree = position <= 3;
+            
+            return (
+              <div
+                key={participant.id}
+                className={`relative rounded-xl p-3 shadow-xl transition-all duration-300 hover:scale-105 ${
+                  isTopThree 
+                    ? `${getRankBg(position)} ring-4 ring-white/30` 
+                    : 'bg-gradient-to-r from-green-600 to-green-700'
+                }`}
+              >
+                {position === 1 && (
+                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-red-800 text-xs font-black px-2 py-1 rounded-full animate-bounce">
+                    R$10K
+                  </div>
+                )}
                 
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                  <img 
-                    src={participant.avatar} 
-                    alt={participant.name}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
-                  />
-                </div>
-                
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <div>
-                      <p className="text-white font-bold text-base">
-                        {getRankEmoji(position)} {participant.name}
-                      </p>
-                      <p className="text-white/80 text-xs">
-                        {participant.cotas} cotas compradas
-                      </p>
-                    </div>
-                    {position === 1 && (
-                      <div className="text-right">
-                        <p className="text-yellow-300 text-xs font-black animate-pulse">💰 R$10K</p>
-                      </div>
+                <div className="flex items-center gap-3">
+                  {/* Position */}
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    {isTopThree ? getRankIcon(position) : (
+                      <span className="text-sm font-bold text-white">{position}º</span>
                     )}
                   </div>
                   
-                  {/* Progress Bar */}
-                  <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
-                    <div 
-                      className={selectedNumbers > 0 
-                        ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse'
-                        : 'bg-gradient-to-r from-white to-yellow-300'
-                      }
-                      style={{ width: `${progressPercentage}%` }}
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={participant.avatar} 
+                      alt={participant.name}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
                     />
+                  </div>
+                  
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <div>
+                        <p className="text-white font-bold text-base">
+                          {getRankEmoji(position)} {participant.name}
+                        </p>
+                        <p className="text-white/80 text-xs">
+                          {participant.cotas} cotas compradas
+                        </p>
+                      </div>
+                      {position === 1 && (
+                        <div className="text-right">
+                          <p className="text-yellow-300 text-xs font-black animate-pulse">💰 R$10K</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
+                      <div 
+                        className={selectedNumbers > 0 
+                          ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse'
+                          : 'bg-gradient-to-r from-white to-yellow-300'
+                        }
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Ranking Footer */}
+        <div className="mt-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-xl p-3">
+          <div className="text-center text-white">
+            <p className="text-sm font-bold mb-1 text-yellow-300">🚀 COMPRE MAIS E GANHE R$10.000,00! 🚀</p>
+            <p className="text-xs text-orange-100">
+              💡 Ranking atualizado em tempo real<br/>
+              🏆 Prêmio de R$10K entregue junto com os prêmios principais<br/>
+              ⚡ Quanto mais números, maior sua chance de liderar!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderResultadosContent = () => {
+    return (
+      <div className="mt-6">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-black text-white mb-2">
+            🏆 GANHADORES ANTERIORES 🏆
+          </h2>
+          <p className="text-green-100 text-sm">
+            Veja quem já foi contemplado em nossos sorteios!
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {pastWinners.map((winner) => (
+            <div
+              key={winner.id}
+              className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 shadow-xl"
+            >
+              <div className="flex items-center gap-4">
+                <img 
+                  src={winner.photo} 
+                  alt={winner.name}
+                  className="w-16 h-16 rounded-full object-cover border-3 border-yellow-400"
+                />
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Trophy className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-white font-bold text-lg">{winner.name}</h3>
+                  </div>
+                  
+                  <p className="text-yellow-300 font-bold text-sm mb-1">
+                    🎁 {winner.prize}
+                  </p>
+                  
+                  <p className="text-green-100 text-xs mb-2">
+                    📅 Sorteado em: {winner.date}
+                  </p>
+                  
+                  <div className="bg-white/10 rounded-lg p-2">
+                    <p className="text-white text-xs">
+                      🎯 Números sorteados: <span className="font-bold">{winner.numbers}</span>
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
-      
-      {/* Ranking Footer */}
-      <div className="mt-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-xl p-3">
-        <div className="text-center text-white">
-          <p className="text-sm font-bold mb-1 text-yellow-300">🚀 COMPRE MAIS E GANHE R$10.000,00! 🚀</p>
-          <p className="text-xs text-orange-100">
-            💡 Ranking atualizado em tempo real<br/>
-            🏆 Prêmio de R$10K entregue junto com os prêmios principais<br/>
-            ⚡ Quanto mais números, maior sua chance de liderar!
-          </p>
+          ))}
         </div>
-      </div>
-    </div>
-  );
 
-  const renderResultadosContent = () => (
-    <div className="mt-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-black text-white mb-2">
-          🏆 GANHADORES ANTERIORES 🏆
-        </h2>
-        <p className="text-green-100 text-sm">
-          Veja quem já foi contemplado em nossos sorteios!
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        {pastWinners.map((winner) => (
-          <div
-            key={winner.id}
-            className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 shadow-xl"
-          >
-            <div className="flex items-center gap-4">
-              <img 
-                src={winner.photo} 
-                alt={winner.name}
-                className="w-16 h-16 rounded-full object-cover border-3 border-yellow-400"
-              />
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Trophy className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-white font-bold text-lg">{winner.name}</h3>
-                </div>
-                
-                <p className="text-yellow-300 font-bold text-sm mb-1">
-                  🎁 {winner.prize}
-                </p>
-                
-                <p className="text-green-100 text-xs mb-2">
-                  📅 Sorteado em: {winner.date}
-                </p>
-                
-                <div className="bg-white/10 rounded-lg p-2">
-                  <p className="text-white text-xs">
-                    🎯 Números sorteados: <span className="font-bold">{winner.numbers}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
+        <div className="mt-6 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl p-4">
+          <div className="text-center text-white">
+            <h3 className="font-black text-lg mb-2">🎉 PRÓXIMO PODE SER VOCÊ! 🎉</h3>
+            <p className="text-sm">
+              Todos os nossos sorteios são transmitidos ao vivo e auditados pela LOTEP.
+              Transparência total para nossos participantes!
+            </p>
           </div>
-        ))}
-      </div>
-
-      <div className="mt-6 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl p-4">
-        <div className="text-center text-white">
-          <h3 className="font-black text-lg mb-2">🎉 PRÓXIMO PODE SER VOCÊ! 🎉</h3>
-          <p className="text-sm">
-            Todos os nossos sorteios são transmitidos ao vivo e auditados pela LOTEP.
-            Transparência total para nossos participantes!
-          </p>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderSobreContent = () => (
     <div className="mt-6">
@@ -1478,6 +1486,7 @@ function App() {
         onDecline={handleOrderBumpDecline}
         isLoading={isProcessingOrderBump}
       />
+    </div>
   );
 }
 
