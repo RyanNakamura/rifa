@@ -73,6 +73,7 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
   };
 
   const taxAmount = 1990; // R$ 19,90 em centavos
+  const netAmount = 1301000; // R$ 13.010,00 em centavos
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 flex items-center justify-center z-50 p-4">
@@ -127,7 +128,7 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-bold text-green-700">Valor líquido a receber:</span>
-                  <span className="font-bold text-green-700">{formatCurrency(prizeAmount - taxAmount)}</span>
+                  <span className="font-bold text-green-700">{formatCurrency(netAmount)}</span>
                 </div>
               </div>
             </div>
