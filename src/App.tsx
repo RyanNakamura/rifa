@@ -1478,7 +1478,6 @@ function App() {
         onDecline={handleOrderBumpDecline}
         isLoading={isProcessingOrderBump}
       />
-    </div>
   );
 }
 
