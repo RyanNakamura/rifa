@@ -290,7 +290,7 @@ function App() {
       clearInterval(statusCheckInterval);
       setStatusCheckInterval(null);
     }
-          setPurchasedNumbers(selectedNumbers + 100);
+    setPurchasedNumbers(selectedNumbers + 100);
   };
 
   const selectCustomQuantity = () => {
@@ -561,7 +561,7 @@ function App() {
     };
   }, [statusCheckInterval]);
 
-    const userData = cpfValidation.userData;
+  const userData = cpfValidation.userData;
 
   // Show PaymentSuccessScreen when payment is approved
   if (showSuccessScreen && successScreenData) {
@@ -677,44 +677,11 @@ function App() {
               <div className="text-xs">SEG</div>
             </div>
           </div>
-          
-          <div className="text-sm">
-            <p className="font-bold mb-1">📍 Transmissão ao vivo no Instagram oficial</p>
-            <p className="text-red-100">🔍 Sorteio auditado pela LOTEP</p>
-          </div>
         </div>
       </div>
 
-      {/* Packages Section */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-black text-center text-white mb-6">
-          🎟️ ESCOLHA SEU PACOTE 🎟️
-        </h2>
-
-        {/* Custom Quantity Input */}
-        <div className="mb-4">
-          <label className="block text-white font-semibold mb-2">
-            Quantas rifas você quer? (mínimo 1)
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              min="1"
-              max="10"
-              onChange={(e) => setCustomQuantity(e.target.value)}
-              placeholder="Digite a quantidade"
-              className="flex-1 p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:border-yellow-400 outline-none"
-            />
-            <button
-              onClick={selectCustomQuantity}
-              disabled={!customQuantity || parseInt(customQuantity) < 1}
-              className="bg-yellow-400 text-green-900 font-bold py-3 px-4 rounded-lg hover:bg-yellow-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Selecionar
-            </button>
-          </div>
-        </div>
-        
+      {/* Packages */}
+      <div className="mt-6">
         <div className="grid grid-cols-2 gap-4">
           {packages.map((pkg, index) => (
             <div
@@ -996,103 +963,103 @@ function App() {
             </div>
 
             {/* Payment Pending Content */}
-                {/* Informações do Pedido */}
-                <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-lg font-black text-green-900 mb-1">
-                      {selectedPackage?.numbers} números
-                    </div>
-                    <div className="text-2xl font-black text-green-800">
-                      R${selectedPackage?.price}
-                    </div>
-                    <div className="text-sm text-green-700">
-                      ID: {pixData.id}
-                    </div>
-                  </div>
+            {/* Informações do Pedido */}
+            <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg p-4 mb-6">
+              <div className="text-center">
+                <div className="text-lg font-black text-green-900 mb-1">
+                  {selectedPackage?.numbers} números
                 </div>
+                <div className="text-2xl font-black text-green-800">
+                  R${selectedPackage?.price}
+                </div>
+                <div className="text-sm text-green-700">
+                  ID: {pixData.id}
+                </div>
+              </div>
+            </div>
 
-                {/* QR Code */}
-                <div className="text-center mb-6">
-                  <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
-                    <img 
-                      src={pixData.pixQrCode} 
-                      alt="QR Code PIX" 
-                      className="w-48 h-48 mx-auto"
-                    />
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Escaneie o QR Code com seu app do banco
-                  </p>
-                </div>
+            {/* QR Code */}
+            <div className="text-center mb-6">
+              <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
+                <img 
+                  src={pixData.pixQrCode} 
+                  alt="QR Code PIX" 
+                  className="w-48 h-48 mx-auto"
+                />
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                Escaneie o QR Code com seu app do banco
+              </p>
+            </div>
 
-                {/* Código PIX */}
-                <div className="mb-6">
-                  <label className="block text-gray-700 font-bold mb-2 text-sm">
-                    Ou copie o código PIX:
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={pixData.pixCode}
-                      readOnly
-                      className="flex-1 p-2 border-2 border-gray-300 rounded-lg bg-gray-50 text-xs font-mono"
-                    />
-                    <button
-                      onClick={copyPixCode}
-                      className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+            {/* Código PIX */}
+            <div className="mb-6">
+              <label className="block text-gray-700 font-bold mb-2 text-sm">
+                Ou copie o código PIX:
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={pixData.pixCode}
+                  readOnly
+                  className="flex-1 p-2 border-2 border-gray-300 rounded-lg bg-gray-50 text-xs font-mono"
+                />
+                <button
+                  onClick={copyPixCode}
+                  className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-                {/* Botões de Ação */}
-                <div className="space-y-3">
-                  <button
-                    onClick={downloadQRCode}
-                    className="w-full bg-blue-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    BAIXAR QR CODE
-                  </button>
-                  
-                  <button
-                    onClick={copyPixCode}
-                    className="w-full bg-green-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    COPIAR CÓDIGO PIX
-                  </button>
-                </div>
+            {/* Botões de Ação */}
+            <div className="space-y-3">
+              <button
+                onClick={downloadQRCode}
+                className="w-full bg-blue-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                BAIXAR QR CODE
+              </button>
+              
+              <button
+                onClick={copyPixCode}
+                className="w-full bg-green-500 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                COPIAR CÓDIGO PIX
+              </button>
+            </div>
 
-                {/* Instruções */}
-                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-bold text-yellow-800 mb-2">📋 Instruções:</h4>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Abra o app do seu banco</li>
-                    <li>• Escolha a opção PIX</li>
-                    <li>• Escaneie o QR Code ou cole o código</li>
-                    <li>• Confirme o pagamento</li>
-                    <li>• Seus números serão enviados por WhatsApp</li>
-                  </ul>
-                </div>
+            {/* Instruções */}
+            <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <h4 className="font-bold text-yellow-800 mb-2">📋 Instruções:</h4>
+              <ul className="text-sm text-yellow-700 space-y-1">
+                <li>• Abra o app do seu banco</li>
+                <li>• Escolha a opção PIX</li>
+                <li>• Escaneie o QR Code ou cole o código</li>
+                <li>• Confirme o pagamento</li>
+                <li>• Seus números serão enviados por WhatsApp</li>
+              </ul>
+            </div>
 
-                {/* Status */}
-                <div className="mt-4 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    {paymentStatus === 'checking' ? (
-                      <>
-                        <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                        <span className="text-sm font-medium text-blue-600">Verificando pagamento...</span>
-                      </>
-                    ) : (
-                      <>
-                        <div className="animate-pulse w-2 h-2 bg-orange-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-orange-600">Aguardando pagamento...</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+            {/* Status */}
+            <div className="mt-4 text-center">
+              <div className="flex items-center justify-center gap-2">
+                {paymentStatus === 'checking' ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    <span className="text-sm font-medium text-blue-600">Verificando pagamento...</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="animate-pulse w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-orange-600">Aguardando pagamento...</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1220,10 +1187,10 @@ function App() {
                   {/* Progress Bar */}
                   <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
                     <div 
-                    className={selectedNumbers > 0 
-                      ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse'
-                      : 'bg-gradient-to-r from-white to-yellow-300'
-                    }
+                      className={selectedNumbers > 0 
+                        ? 'bg-gradient-to-r from-yellow-300 to-yellow-500 animate-pulse'
+                        : 'bg-gradient-to-r from-white to-yellow-300'
+                      }
                       style={{ width: `${progressPercentage}%` }}
                     />
                   </div>
