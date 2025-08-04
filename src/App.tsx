@@ -429,9 +429,8 @@ function App() {
       return;
     }
     
-    // Ir direto para a tela da roleta após pagamento confirmado
-    setShowPaymentScreen(false);
-    setShowRoulette(true);
+    // Mostrar order bump após validações
+    setShowOrderBump(true);
   };
 
   const handleOrderBumpAccept = async () => {
