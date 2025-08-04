@@ -72,7 +72,7 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
     }, 1500);
   };
 
-  const taxAmount = 1500; // R$ 15,00 de taxa
+  const taxAmount = 1990; // R$ 19,90 em centavos
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 flex items-center justify-center z-50 p-4">
