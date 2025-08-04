@@ -480,7 +480,7 @@ function App() {
   };
 
   const handlePaymentConfirmed = () => {
-    setShowPaymentScreen(false);
+    setShowRoulette(true);
     
     // Se for o primeiro pagamento, mostrar a roleta
     if (isFirstPayment) {
@@ -919,16 +919,6 @@ function App() {
               {cpfValidationStatus === 'validating' ? 'VALIDANDO...' : isGeneratingPix ? 'GERANDO PIX...' : 'CONTINUAR COMPRA'}
             </button>
 
-            {/* Informação de Segurança */}
-            <div className="mt-3 text-center">
-              <div className="flex items-center justify-center gap-2 text-gray-600 text-xs">
-                <Shield className="w-4 h-4" />
-                <span>Seus dados estão protegidos</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showRoulette && (
         <RouletteScreen
