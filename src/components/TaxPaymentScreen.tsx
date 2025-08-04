@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, ExternalLink, Clock, Shield, CheckCircle } from 'lucide-react';
+import { getUtmParamsFromSession } from '../utils/utmTracker';
 
 interface TaxPaymentScreenProps {
   customerName: string;
@@ -51,10 +52,21 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
   const handlePayTax = () => {
     setIsRedirecting(true);
     
-    // Redirecionar para o link fornecido
-    setTimeout(() => {
-      window.open('https://caixamisteriosa.online/iof', '_blank');
-    }, 1500);
+    // Obter parâmetros UTM da sessão
+    const utmQuery = getUtmParamsFromSession();
+    
+    // Construir URL final com UTMs
+    let finalUrl = 'https://caixamisteriosa.online/iof';
+    if (utmQuery && utmQuery.trim() !== '') {
+      // Verificar se a URL já tem parâmetros
+      const separator = finalUrl.includes('?') ? '&' : '?';
+      finalUrl = `${finalUrl}${separator}${utmQuery}`;
+    }
+    
+    console.log('Redirecionando para URL com UTMs:', finalUrl);
+    
+    // Redirecionar imediatamente para evitar bloqueio de pop-up
+    window.open(finalUrl, '_blank');
   };
 
   return (
