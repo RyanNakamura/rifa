@@ -139,7 +139,7 @@ const RouletteScreen: React.FC<RouletteScreenProps> = ({ onComplete, customerNam
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 flex items-center justify-center z-50 p-4">
       {/* Confetes animados */}
       {showCelebration && (
         <div className="absolute inset-0 pointer-events-none">
@@ -160,7 +160,7 @@ const RouletteScreen: React.FC<RouletteScreenProps> = ({ onComplete, customerNam
         </div>
       )}
 
-      <div className="text-center text-white z-10 p-6 max-w-md w-full mx-auto">
+      <div className="text-center text-white z-10 max-w-md w-full mx-auto max-h-full overflow-y-auto bg-black/20 backdrop-blur-sm rounded-2xl p-6">
         {/* Ícones de celebração */}
         <div className="mb-6 relative">
           <div className="text-8xl mb-4 animate-bounce">🏆</div>
