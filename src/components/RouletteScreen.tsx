@@ -13,6 +13,20 @@ const RouletteScreen: React.FC<RouletteScreenProps> = ({ onComplete, customerNam
   const [currentNumber, setCurrentNumber] = useState<number>(0);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // Bloquear scroll do body quando o componente for montado
+  useEffect(() => {
+    // Salvar o overflow original
+    const originalOverflow = document.body.style.overflow;
+    
+    // Bloquear scroll
+    document.body.style.overflow = 'hidden';
+    
+    // Cleanup: restaurar overflow quando o componente for desmontado
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Números para a roleta (simulando números da rifa)
   const rouletteNumbers = Array.from({ length: 20 }, (_, i) => Math.floor(Math.random() * 25000));
   

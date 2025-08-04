@@ -15,6 +15,20 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutos
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  // Bloquear scroll do body quando o componente for montado
+  React.useEffect(() => {
+    // Salvar o overflow original
+    const originalOverflow = document.body.style.overflow;
+    
+    // Bloquear scroll
+    document.body.style.overflow = 'hidden';
+    
+    // Cleanup: restaurar overflow quando o componente for desmontado
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // Countdown timer
   React.useEffect(() => {
     if (timeLeft <= 0) return;
