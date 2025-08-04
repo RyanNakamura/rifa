@@ -1054,7 +1054,7 @@ function App() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 
   const renderConsultarContent = () => (
