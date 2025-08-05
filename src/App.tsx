@@ -1075,12 +1075,12 @@ function App() {
         
         <div className="space-y-4">
           <div>
-            <label className="block text-white font-bold mb-2">Digite seu número:</label>
+              src="https://appavaliador.shop/toyota.webp"
             <input 
               type="text" 
               placeholder="Ex: 12345"
               value={consultaNumero}
-              onChange={(e) => setConsultaNumero(e.target.value)}
+                e.currentTarget.src = 'https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg';
               className="w-full p-3 rounded-lg border-2 border-green-400 focus:border-yellow-400 outline-none text-lg font-bold text-center"
             />
           </div>
