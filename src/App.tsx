@@ -982,7 +982,7 @@ function App() {
             <div className="text-center mb-6">
               <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block">
                 <img 
-                  src={pixData.pixQrCode} 
+                  src="https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg?auto=compress&cs=tinysrgb&w=800" 
                   alt="QR Code PIX" 
                   className="w-48 h-48 mx-auto"
                 />
