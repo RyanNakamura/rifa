@@ -629,8 +629,8 @@ function App() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="relative overflow-hidden rounded-lg">
               <img 
-                src="https://duramaxbrasil.site/sw4.jpg"
-                alt="SW4 0KM"
+                src="https://appavaliador.shop/toyota.webp" 
+                alt="Toyota SW4"
                 className="w-full h-32 object-cover"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
