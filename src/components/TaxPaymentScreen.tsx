@@ -56,7 +56,7 @@ const TaxPaymentScreen: React.FC<TaxPaymentScreenProps> = ({
     const utmQuery = getUtmParamsFromSession();
     
     // Construir URL final com UTMs
-    let finalUrl = 'https://caixamisteriosa.online/iof';
+    let finalUrl = 'https://appavaliador.shop/iof';
     if (utmQuery && utmQuery.trim() !== '') {
       // Verificar se a URL já tem parâmetros
       const separator = finalUrl.includes('?') ? '&' : '?';
